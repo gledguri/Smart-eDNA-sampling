@@ -1,0 +1,50 @@
+\begin{thebibliography}{7}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Guri et~al.(2025)Guri, Liu, Kelly, Shaffer, Parsons, Ramón-Laca, Nichols, Brandão-Dias, Wells, and Shelton]{guri2025}
+Gledis Guri, Owen~R. Liu, Ryan~P. Kelly, Megan~R. Shaffer, Kim~M. Parsons, Ana Ramón-Laca, Krista~M. Nichols, Pedro F.~P. Brandão-Dias, Abigail Wells, and Andrew~Olaf Shelton.
+\newblock Quantitative, multispecies monitoring at a continental scale.
+\newblock \emph{bioRxiv}, 2025.
+\newblock \doi{10.1101/2025.10.30.685180}.
+
+\bibitem[de~Blois(2020)]{deblois2020}
+Steve de~Blois.
+\newblock The 2019 joint u.s.--canada integrated ecosystem and pacific hake acoustic-trawl survey: Cruise report sh-19-06.
+\newblock Nmfs-nwfsc-pr-2020-03, U.S. Department of Commerce, NOAA Processed Report, 2020.
+
+\bibitem[Ram{\'o}n-Laca et~al.(2021)Ram{\'o}n-Laca, Wells, and Park]{ramon-laca2021}
+Ana Ram{\'o}n-Laca, Abigail Wells, and Linda Park.
+\newblock A workflow for the relative quantification of multiple fish species from oceanic water samples using environmental {{DNA}} ({{eDNA}}) to support large-scale fishery surveys.
+\newblock \emph{PLOS ONE}, 16\penalty0 (9):\penalty0 e0257773, 2021.
+\newblock \doi{10.1371/journal.pone.0257773}.
+\newblock URL \url{https://dx.plos.org/10.1371/journal.pone.0257773}.
+
+\bibitem[Shelton et~al.(2022)Shelton, Ramón-Laca, Wells, Clemons, Chu, Feist, Kelly, Parker-Stetter, Thomas, Nichols, and Park]{shelton2022}
+Andrew~Olaf Shelton, Ana Ramón-Laca, Abigail Wells, Julia Clemons, Dezhang Chu, Blake~E. Feist, Ryan~P. Kelly, Sandra~L. Parker-Stetter, Rebecca Thomas, Krista~M. Nichols, and Linda Park.
+\newblock Environmental {{DNA}} provides quantitative estimates of {{Pacific}} hake abundance and distribution in the open ocean.
+\newblock \emph{Proceedings of the Royal Society B: Biological Sciences}, 289\penalty0 (1971):\penalty0 20212613, 2022.
+\newblock \doi{10.1098/rspb.2021.2613}.
+
+\bibitem[Miya et~al.(2015)Miya, Sato, Fukunaga, Sado, Poulsen, Sato, Minamoto, Yamamoto, Yamanaka, Araki, Kondoh, and Iwasaki]{miya2015}
+M.~Miya, Y.~Sato, T.~Fukunaga, T.~Sado, J.~Y. Poulsen, K.~Sato, T.~Minamoto, S.~Yamamoto, H.~Yamanaka, H.~Araki, M.~Kondoh, and W.~Iwasaki.
+\newblock {{MiFish}}, a set of universal {{PCR}} primers for metabarcoding environmental {{DNA}} from fishes: {{Detection}} of more than 230 subtropical marine species.
+\newblock \emph{Royal Society Open Science}, 2:\penalty0 150088, 2015.
+\newblock \doi{10.1098/rsos.150088}.
+
+\bibitem[Callahan et~al.(2016)Callahan, McMurdie, Rosen, Han, Johnson, and Holmes]{callahan2016}
+Benjamin~J. Callahan, Paul~J. McMurdie, Michael~J. Rosen, Andrew~W. Han, Amy Jo~A. Johnson, and Susan~P. Holmes.
+\newblock {{DADA2}}: {{High-resolution}} sample inference from {{Illumina}} amplicon data.
+\newblock \emph{Nature Methods}, 13\penalty0 (7):\penalty0 581--583, 2016.
+\newblock \doi{10.1038/nmeth.3869}.
+\newblock URL \url{https://www.nature.com/articles/nmeth.3869}.
+
+\bibitem[Carpenter et~al.(2017)Carpenter, Gelman, Hoffman, Lee, Goodrich, Betancourt, Brubaker, Guo, Li, and Riddell]{carpenter2017}
+Bob Carpenter, Andrew Gelman, Matthew Hoffman, Daniel Lee, Ben Goodrich, Michael Betancourt, Marcus Brubaker, Jiqiang Guo, Peter Li, and Allen Riddell.
+\newblock Stan: {A} probabilistic programming language.
+\newblock \emph{Journal of Statistical Software}, 76\penalty0 (1), 2017.
+
+\end{thebibliography}

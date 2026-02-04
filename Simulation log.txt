@@ -1,0 +1,155 @@
+N=3000
+
+Iteration		Location			 Progress	Rho
+Iteration 1:	Air M3---------------100%		d{1:15}
+Iteration 2:	Server---------------100% 		d{1:15}
+Iteration 3: 	Server---------------100%		d{1:15}
+Iteration 4: 	Server---------------100%		d{1:15}
+Iteration 5: 	Drifter1-------------100%		d{1:15}
+Iteration 6: 	Server---------------100%		d{1:15}
+Iteration 7: 	Server---------------100%		d{1:15}
+Iteration 8: 	Server---------------100%		d{1:15}
+Iteration 9: 	Server---------------100%		d{1:15}
+Iteration 10: 	Kai------------------100%		d{1:15}
+Iteration 11: 	Server---------------100%		d{1:15}
+Iteration 12: 	Server---------------100%		d{1:15}
+Iteration 13: 	Server---------------100%		d{1:15}
+Iteration 14: 	Server---------------100%		d{1:15}
+Iteration 15: 	Server---------------100%		d{1:15}
+Iteration 16: 	Server---------------100%		d{1:15}
+Iteration 17: 	Server---------------100%		d{1:15}
+Iteration 18: 	Server---------------100%		d{1:15}
+Iteration 19: 	Server---------------100%		d{1:15}
+Iteration 20: 	Server---------------100%		d{1:15}
+----------------------- DONE --------------------------
+
+
+N=2000
+
+Iteration		Location			Progress	Rho
+Iteration 1:	Server---------------100%		d{1:15}
+Iteration 2:	Server---------------100%		d{1:15}
+Iteration 3: 	Server---------------100%		d{1:15}
+Iteration 4: 	Server---------------100%		d{1:15}
+Iteration 5: 	Server---------------100%		d{1:15}
+Iteration 6: 	Server---------------100%		d{1:15}
+Iteration 7: 	Server---------------100%		d{1:15}
+Iteration 8: 	Server---------------100%		d{1:15}
+Iteration 9: 	Server---------------100%		d{1:15}
+Iteration 10: 	Kai------------------100%		d{1:15}
+Iteration 11: 	Server---------------100%		d{1:15}
+Iteration 12: 	Server---------------100%		d{1:15}
+Iteration 13: 	Server---------------100%		d{1:15}
+Iteration 14: 	Server---------------100%		d{1:15}
+Iteration 15: 	Server---------------100%		d{1:15}
+Iteration 16: 	Server---------------100%		d{1:15}
+Iteration 17: 	Server---------------100%		d{1:15}
+Iteration 18: 	Server---------------100%		d{1:15}
+Iteration 19: 	Server---------------100%		d{1:15}
+Iteration 20: 	Server---------------100%		d{1:15}
+----------------------- DONE --------------------------
+
+
+N=1000
+
+Iteration		Location			Progress	Rho
+Iteration 1:	Server--------------100%		d{1:15}
+Iteration 2:	Drifter2------------100%		d{1:15}
+Iteration 3: 	Drifter2------------100%		d{1:15}
+Iteration 4: 	Drifter2------------100%		d{1:15}
+Iteration 5: 	Server--------------100%		d{1:15}
+Iteration 6: 	Server--------------100%		d{1:15}
+Iteration 7: 	Server--------------100%		d{1:15}
+Iteration 8: 	Server--------------100%		d{1:15}
+Iteration 9: 	Server--------------100%		d{1:15}
+Iteration 10: 	Kai-----------------100%		d{1:15}
+Iteration 11: 	Server--------------100%		d{1:15}
+Iteration 12: 	Server--------------100%		d{1:15}
+Iteration 13: 	Server--------------100%		d{1:15}
+Iteration 14: 	Server--------------100%		d{1:15}
+Iteration 15: 	Server--------------100%		d{1:15}
+Iteration 16: 	Server--------------100%		d{1:15}
+Iteration 17: 	Server--------------100%		d{1:15}
+Iteration 18: 	Server--------------100%		d{1:15}
+Iteration 19: 	Server--------------100%		d{1:15}
+Iteration 20: 	Server--------------100%		d{1:15}
+----------------------- DONE --------------------------
+
+
+N=600
+
+Iteration		Location			Progress	Rho
+Iteration 1:	Server--------------100%		d{1:15}
+Iteration 2:	Server--------------100%		d{1:15}
+Iteration 3: 	Server--------------100%		d{1:15}
+Iteration 4: 	Server--------------100%		d{1:15}
+Iteration 5: 	Server--------------100%		d{1:15}
+Iteration 6: 	Server--------------100%		d{1:15}
+Iteration 7: 	Server--------------100%		d{1:15}
+Iteration 8: 	Server--------------100%		d{1:15}
+Iteration 9: 	Server--------------100%		d{1:15}
+Iteration 10: 	Kai-----------------100%		d{1:15}
+Iteration 11: 	Server--------------100%		d{1:15}
+Iteration 12: 	Server--------------100%		d{1:15}
+Iteration 13: 	Server--------------100%		d{1:15}
+Iteration 14: 	Server--------------100%		d{1:15}
+Iteration 15: 	Server--------------100%		d{1:15}
+Iteration 16: 	Server--------------100%		d{1:15}
+Iteration 17: 	Server------------*
+Iteration 18: 	Server--------------100%		d{1:15}
+Iteration 19: 	Server--------------100%		d{1:15}
+Iteration 20: 	Server--------------100%		d{1:15}
+----------------------- DONE --------------------------
+
+
+N=350
+
+Iteration		Location			Progress	Rho
+Iteration 1:	Server--------------100%		d{1:15}
+Iteration 2:	Server--------------100%		d{1:15}
+Iteration 3: 	Server--------------100%		d{1:15}
+Iteration 4: 	Server--------------100%		d{1:15}
+Iteration 5: 	Server--------------100%		d{1:15}
+Iteration 6: 	Server--------------100%		d{1:15}
+Iteration 7: 	Server--------------100%		d{1:15}
+Iteration 8: 	Server--------------100%		d{1:15}
+Iteration 9: 	Server--------------100%		d{1:15}
+Iteration 10: 	Kai-----------------100%		d{1:15}
+Iteration 11: 	Server--------------100%		d{1:15}
+Iteration 12: 	Server------------*
+Iteration 13: 	Server--------------100%		d{1:15}
+Iteration 14: 	Server--------------100%		d{1:15}
+Iteration 15: 	Server--------------100%		d{1:15}
+Iteration 16: 	Server--------------100%		d{1:15}
+Iteration 17: 	Server------------*
+Iteration 18: 	Server--------------100%		d{1:15}
+Iteration 19: 	Server--------------100%		d{1:15}
+Iteration 20: 	Server--------------100%		d{1:15}
+----------------------- DONE --------------------------
+
+
+N=200
+
+Iteration		Location			Progress	Rho
+Iteration 1:	Server--------------100%		d{1:15}
+Iteration 2:	Server--------------100%		d{1:15}
+Iteration 3: 	Server--------------100%		d{1:15}
+Iteration 4: 	Server--------------100%		d{1:15}
+Iteration 5: 	Server--------------100%		d{1:15}
+Iteration 6: 	Server--------------100%		d{1:15}
+Iteration 7: 	Server--------------100%		d{1:15}
+Iteration 8: 	Server--------------100%		d{1:15}
+Iteration 9: 	Server--------------100%		d{1:15}
+Iteration 10: 	Kai-----------------100%		d{1:15}
+Iteration 11: 	Server--------------100%		d{1:15}
+Iteration 12: 	Server------------*
+Iteration 13: 	Server--------------100%		d{1:15}
+Iteration 14: 	Server--------------100%		d{1:15}
+Iteration 15: 	Server--------------100%		d{1:15}
+Iteration 16: 	Server--------------100%		d{1:15}
+Iteration 17: 	Server------------/
+Iteration 18: 	Server--------------100%		d{1:15}
+Iteration 19: 	Server--------------100%		d{1:15}
+Iteration 20: 	Server--------------100%		d{1:15}
+----------------------- DONE --------------------------
+
