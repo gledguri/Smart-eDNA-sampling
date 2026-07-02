@@ -1,2 +1,0 @@
-Examine the pairs() plot to diagnose sampling problems
-

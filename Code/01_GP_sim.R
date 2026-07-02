@@ -17,11 +17,6 @@ select <- dplyr::select
 
 
 
-
-
-
-
-
 # Functions --------------------------------------------------------------
 
 extract_param <- function(model, par) {
@@ -67,14 +62,7 @@ simulate_spatial_gp <- function(coords, alpha = 4, length_scale = 1, sigma_sim =
 
 
 
-
-
-
-
-
-
 # Data import and declaration --------------------------------------------
-# stan_model <- stan_model(here('Code','GP_7.stan')) # Load stan model
 stan_model <- stan_model(here('Code','GP.stan')) # Load stan model
 pred_data <- readRDS(here('Data','pred_data.rds')) # Load the coordinates where the prediction will be made
 edna_data <- readRDS(here('Data','edna_data.rds')) # Load the real eDNA data
@@ -102,22 +90,13 @@ priors <- list(
 
 
 
-
-
-
-
-
-
-
-
 # # Simulate the raw GP fields ---------------------------------------------
 # Initialize lists for simulation data
 c <- vector("list", 5) # Simulated points at each depth
 z <- vector("list", 5) # Simulated eDNA concentration (log) through GP at each depth
 x <- vector("list", 5) # Combined coordinates and eDNA concentration data
 
-# for (h in 1:20) { # Repeat for 20 iterations
-h=6
+for (h in 1:20) { # Repeat for 20 iterations
 	for (j in 3:12) { # Vary length-scale parameter (rho)
 		for (i in 1:5) {  # Loop over each depth as a different layer (with the same rho)
 			mu_selected <- rnorm(1, 0, 3)
@@ -136,29 +115,20 @@ h=6
 		}
 
 		saveRDS(bind_rows(x),here('Output',
-															'Raw_GP_fileds_simulated_alternative',
+															'Raw_GP_fileds_simulated',
 															paste0(j,'_',h,'.rds')))
 	}
-# }
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
+}
+
+
+ 
 # GP 1-st thinning estimations loops -------------------------------------
 
-scenarios_1 <- c(4000,2000,1000,600,350,200) # Declare number of sampling points scenarios
+scenarios_1 <- c(4000,2000,1000,600,350) # Declare number of sampling points scenarios
 
 #--- --- --- loops --- --- ---
-# for (k in 1:length(scenarios_1)){ # Loop across different sampling size scenarios
-k=5
-# j=3
- # for (h in 1:20){ # Loop across 20 different iterations
-h=1
+for (k in 1:length(scenarios_1)){ # Loop across different sampling size scenarios
+ for (h in 1:20){ # Loop across 20 different iterations
   for (j in 3:12){ # Loop across different length-scale parameters
    
   # Read simulated GP data
@@ -183,7 +153,7 @@ h=1
    mutate(depth=as.numeric(as.character(depth_cat))) %>% 
    arrange(depth,x,y)
 
-  saveRDS(sim_data,here('Output',paste0('GP_',scenarios_1[k],'x'),paste0(name_file,'_simulated_data.rds')))
+  saveRDS(sim_data,here('Output',paste0('GP_',scenarios_1[k]),paste0(name_file,'_simulated_data.rds')))
 
   # Model stan 
   stan_data_raw <- list(
@@ -217,21 +187,14 @@ h=1
    as.data.frame() %>% rownames_to_column('param') %>% select(param,mean,`2.5%`,`25%`,`50%`,`75%`,`97.5%`)
 
   write.csv(GP_param,file = here('Output',paste0('GP_',scenarios_1[k],'x'),paste0(name_file,'_est_GP_param.csv')))
-  if (k==1) {write.csv(sim_param,file = here('Output',paste0('GP_',scenarios_1[k]),paste0(name_file,'_sim_GP_param.csv')))}
+  if (k==1) {write.csv(sim_param,file = here('Output','simulated_parameters',paste0(name_file,'_sim_GP_param.csv')))}
 
   pred_data_stan <- pred_data_by_depth %>% bind_cols(.,extract_param(fit,c('y_pred'))) %>% rename(conc=mean)
 
   saveRDS(pred_data_stan, here('Output',paste0('GP_',scenarios_1[k],'x'),paste0(name_file,'_pred_GP.rds')))
-  # } # end loop across different sampling size scenarios
- # } # end loop across 20 different iterations
+  } # end loop across different sampling size scenarios
+ } # end loop across 20 different iterations
 } # end loop across different length-scale parameters
-
-
-
-
-
-
-
 
 
 
@@ -240,19 +203,18 @@ h=1
 
 # GP 2-nd thinning estimations loops -------------------------------------
 
-scenarios_2 <- c(330,300,260,220,150,100) # Declare number of sampling points scenarios
+scenarios_2 <- c(330,300,260,220,150) # Declare number of sampling points scenarios
 
 #--- --- --- loops --- --- ---
-# for (k in 1:length(scenarios_2)){ # Loop across different sampling size scenarios
-k=6
- for (h in 2:20){ # Loop across 20 different iterations
-  for (j in 2:15){ # Loop across different length-scale parameters
+for (k in 1:length(scenarios_2)){ # Loop across different sampling size scenarios
+ for (h in 1:20){ # Loop across 20 different iterations
+  for (j in 3:12){ # Loop across different length-scale parameters
    
   # Read simulated GP data
   name_file <- paste0(j,'_',h)
    
   if (k==1) {sim_data_raw <- readRDS(here('Output','GP_350',paste0(name_file,'_simulated_data.rds')))}
-  if (k!=1) {sim_data_raw <- readRDS(here('Output','GP_sth',paste0('GP_',scenarios_2[k-1]),paste0(name_file,'_simulated_data.rds')))}
+  if (k!=1) {sim_data_raw <- readRDS(here('Output',paste0('GP_',scenarios_2[k-1]),paste0(name_file,'_simulated_data.rds')))}
 
   # Summarize simulated mu by depth category
   mu_depth <- sim_data_raw %>% 
@@ -310,7 +272,7 @@ k=6
   saveRDS(pred_data_stan, here('Output','GP_sth',paste0('GP_',scenarios_2[k]),paste0(name_file,'_pred_GP.rds')))
   } # end loop across different sampling size scenarios
  } # end loop across 20 different iterations
-# } # end loop across different length-scale parameters
+} # end loop across different length-scale parameters
 
 
 # Real world data --------------------------------------------------------
