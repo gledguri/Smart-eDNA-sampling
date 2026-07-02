@@ -45,7 +45,7 @@ automatically if deleted.
 
 `Data/` and `Output/` are archived on Zenodo:
 
-> **Zenodo record:** `[DOI / link to be added]`
+> **Zenodo record:** `[10.5281/zenodo.21141367]`
 
 Run `00_Download_data.R` to fetch and unpack them automatically, or download
 the archive manually from the Zenodo record above and place the `Data/` and
