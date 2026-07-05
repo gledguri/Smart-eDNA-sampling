@@ -71,6 +71,6 @@ source of the empirical eDNA data:
 
 > Guri, G. et al. Smart eDNA sampling strategies. *In review.*
 >
-> Guri, G., Shelton, A.O., Kelly, R.P., et al. (2024). Predicting trawl
-> catches using environmental DNA. *ICES Journal of Marine Science*, 81(8),
-> 1536–1548. https://doi.org/10.1093/icesjms/fsae097
+> Gledis Guri,  Owen R. Liu,  Ryan P. Kelly,  et al. (2024).
+> Quantitative, Multispecies Monitoring at a Continental Scale.
+> https://doi.org/10.1101/2025.10.30.685180
