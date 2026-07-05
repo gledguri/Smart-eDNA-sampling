@@ -126,6 +126,6 @@ unlink(tmp, recursive = TRUE)   # clean up the temp copy
 # 01_GP_sim.R / 02_Data_manip.R if you want to regenerate the simulations and
 # intermediate output from scratch (compute-heavy; originally run on an HPC
 # cluster).
-# file.edit(here("Code", "01_GP_sim.R"))
-# file.edit(here("Code", "02_Data_manip.R"))
+file.edit(here("Code", "01_GP_sim.R"))
+file.edit(here("Code", "02_Data_manip.R"))
 file.edit(here("Code", "03_Plots.R"))
