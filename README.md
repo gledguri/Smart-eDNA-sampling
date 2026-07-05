@@ -63,7 +63,3 @@ If you use this code or data, please cite the associated manuscript and the
 source of the empirical eDNA data:
 
 > Guri, G. et al. Smart eDNA sampling strategies. *In review.*
->
-> Gledis Guri,  Owen R. Liu,  Ryan P. Kelly,  et al. (2024).
-> Quantitative, Multispecies Monitoring at a Continental Scale.
-> https://doi.org/10.1101/2025.10.30.685180
