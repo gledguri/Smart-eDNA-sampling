@@ -23,7 +23,7 @@ Scripts are numbered in the order they should be run:
 
 | Script | Purpose |
 |---|---|
-| `00_Download_data.R` | Downloads the `Data/` and `Output/` folders from the Zenodo archive (see below) and unpacks them as siblings of `Code/`. Run this once, before anything else. |
+| `00_Download_data.R` | Downloads the `Data/` and `Output/` folders from the Zenodo archive (see below) and unpacks them. Run this once, before anything else. |
 | `01_GP_sim.R` | **Simulations.** Simulates raw spatial GP fields at the empirical prediction grid over a range of length-scales (`Output/Raw_GP_fileds_simulated/`), then progressively thins each field down to a series of sample sizes *N* and fits the Stan GP model (`GP.stan`) to each thinned sample, saving the thinned samples, estimated GP parameters (`μ`, `α`, `ρ`, `σ`), and grid-wide predictions to `Output/GP_<N>/`. The same thin-and-fit procedure is repeated on the empirical multi-species eDNA data (`Output/GP_multifish/`). |
 | `02_Data_manip.R` | **Data manipulation.** Collects the many per-iteration/per-species files produced by `01_GP_sim.R` from `Output/GP_<N>/`, `Output/Raw_GP_fileds_simulated/`, `Output/simulated_parameters/`, and `Output/GP_multifish/`, and compiles them into a small number of compact combined data frames (`.rds`/`.csv`) saved to `Output/Complete_db/`. |
 | `03_Plots.R` | Reads the compiled data frames in `Output/Complete_db/` and produces the manuscript's main and supplementary figures, saved to `Plots/`. |
