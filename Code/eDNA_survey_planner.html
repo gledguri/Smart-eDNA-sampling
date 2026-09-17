@@ -43,6 +43,8 @@
     .field { margin: 0 0 17px; }
     label { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: .9rem; font-weight: 750; }
     label span { color: var(--muted); font-weight: 500; }
+    .label-main { display: inline-flex; align-items: center; gap: 7px; }
+    .epsilon-help { display: inline-grid; place-items: center; width: 23px; height: 23px; padding: 0; border-radius: 50%; font-size: .9rem; line-height: 1; }
     input[type="number"] { width: 100%; border: 1px solid #b9ccc8; border-radius: 10px; background: #fff; color: var(--ink); padding: 11px 12px; font: inherit; font-variant-numeric: tabular-nums; }
     input:focus { outline: 3px solid rgba(0,109,119,.16); border-color: var(--teal); }
     .presets { display: flex; gap: 7px; flex-wrap: wrap; margin: -6px 0 19px; }
@@ -62,6 +64,7 @@
     .number { padding: 16px; background: #f4f8f7; border-radius: 12px; min-height: 105px; }
     .number strong { display: block; color: var(--teal-dark); font-family: Georgia, serif; font-size: clamp(1.55rem, 3vw, 2.35rem); font-weight: 500; line-height: 1.05; font-variant-numeric: tabular-nums; }
     .number span { display: block; margin-top: 7px; color: var(--muted); font-size: .78rem; line-height: 1.3; }
+    .symbol { display: inline-block; margin-right: 5px; color: var(--teal-dark); font-family: Georgia, serif; font-size: 1rem; font-weight: 700; }
     .status { margin: 14px 0 0; padding: 10px 12px; border-radius: 9px; background: var(--pale); color: var(--teal-dark); font-size: .86rem; }
     .status.warn { background: var(--warn-bg); color: var(--warn); }
     .chart-card { padding: 25px; overflow: hidden; }
@@ -78,6 +81,13 @@
     .chart-title { fill: var(--ink); font-size: 13px; font-weight: 750; font-family: inherit; }
     .interpretation { padding: 24px 25px; }
     .interpretation p { color: var(--muted); margin: 8px 0 0; }
+    dialog { width: min(920px, calc(100% - 28px)); max-height: calc(100vh - 36px); padding: 0; border: 0; border-radius: 18px; box-shadow: 0 22px 70px rgba(16,42,46,.28); }
+    dialog::backdrop { background: rgba(8,30,34,.68); }
+    .figure-modal { padding: 22px; }
+    .figure-modal-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
+    .figure-modal img { display: block; width: 100%; max-height: 72vh; margin-top: 14px; object-fit: contain; border: 1px solid var(--line); border-radius: 10px; }
+    .figure-modal figcaption { margin-top: 10px; color: var(--muted); font-size: .84rem; }
+    .close-modal { flex: none; font-size: 1.1rem; }
     code { color: var(--teal-dark); background: #edf5f3; padding: 2px 5px; border-radius: 5px; }
     footer { padding: 34px 0 54px; color: var(--muted); font-size: .82rem; }
     @media (max-width: 820px) {
@@ -103,8 +113,12 @@
       <p class="section-copy">Change any number. Results recalculate as you type.</p>
 
       <div class="field">
-        <label for="epsilon">Target prediction error ε <span>log-scale RMSE</span></label>
+        <label for="epsilon"><span class="label-main">Target prediction error ε <button class="epsilon-help" type="button" aria-label="Open Figure S3 explaining prediction error" title="Open Figure S3">↗</button></span><span>log-scale RMSE</span></label>
         <input id="epsilon" type="number" value="0.8" min="0.001" step="0.05">
+      </div>
+      <div class="field">
+        <label for="strata">Number of strata H <span>e.g. depth layers</span></label>
+        <input id="strata" type="number" value="5" min="1" step="1">
       </div>
       <div class="field">
         <label for="rho">Spatial length scale ρ <span>km</span></label>
@@ -120,10 +134,6 @@
       <div class="field">
         <label for="area">Survey area <span>km² per stratum</span></label>
         <input id="area" type="number" value="50000" min="1" step="1000">
-      </div>
-      <div class="field">
-        <label for="strata">Number of strata <span>e.g. depth layers</span></label>
-        <input id="strata" type="number" value="5" min="1" step="1">
       </div>
       <div class="field">
         <label for="available">Available samples <span>per stratum</span></label>
@@ -145,11 +155,11 @@
 
     <section class="results" aria-live="polite">
       <article class="card result-card">
-        <div class="result-head"><div><h2>How many samples?</h2><p class="section-copy">For the entered target ε and survey area.</p></div><span class="badge">ε → effort</span></div>
+        <div class="result-head"><div><h2>How many samples?</h2><p class="section-copy">For the entered target ε <button class="epsilon-help" type="button" aria-label="Open Figure S3 explaining prediction error" title="Open Figure S3">↗</button> and survey area.</p></div><span class="badge">ε → effort</span></div>
         <div class="number-grid">
-          <div class="number"><strong id="requiredDensity">—</strong><span>samples / 10,000 km² / stratum</span></div>
-          <div class="number"><strong id="requiredPerStratum">—</strong><span>whole samples per stratum</span></div>
-          <div class="number"><strong id="requiredTotal">—</strong><span>total site-stratum observations</span></div>
+          <div class="number"><strong id="requiredDensity">—</strong><span><b class="symbol">E</b>effort: samples / 10,000 km² / stratum</span></div>
+          <div class="number"><strong id="requiredPerStratum">—</strong><span><b class="symbol">E/H</b>whole samples per stratum</span></div>
+          <div class="number"><strong id="requiredTotal">—</strong><span><b class="symbol">N</b>total site-stratum observations</span></div>
         </div>
         <p id="sampleStatus" class="status">Enter a valid scenario.</p>
       </article>
@@ -157,9 +167,9 @@
       <article class="card result-card">
         <div class="result-head"><div><h2>How much area?</h2><p class="section-copy">Conditional area supported by the available samples at target ε.</p></div><span class="badge">effort → area</span></div>
         <div class="number-grid">
-          <div class="number"><strong id="supportedArea">—</strong><span>km² per stratum</span></div>
+          <div class="number"><strong id="supportedArea">—</strong><span><b class="symbol">A</b>km² per stratum</span></div>
           <div class="number"><strong id="availableDensity">—</strong><span>current samples / 10,000 km² / stratum</span></div>
-          <div class="number"><strong id="expectedError">—</strong><span>expected ε for current area and effort</span></div>
+          <div class="number"><strong id="expectedError">—</strong><span><b class="symbol">ε</b>expected prediction error for current area and effort <button class="epsilon-help" type="button" aria-label="Open Figure S3 explaining prediction error" title="Open Figure S3">↗</button></span></div>
         </div>
         <p id="areaStatus" class="status">Area is a density-equivalent planning value; it does not locate a boundary of reliable inference.</p>
       </article>
@@ -177,6 +187,17 @@
       </article>
     </section>
   </main>
+
+  <dialog id="epsilonFigure" aria-labelledby="epsilonFigureTitle">
+    <figure class="figure-modal">
+      <div class="figure-modal-head">
+        <div><h2 id="epsilonFigureTitle">Figure S3</h2><p class="section-copy">Simulation results underlying the prediction-error calibration.</p></div>
+        <button id="closeFigure" class="close-modal" type="button" aria-label="Close Figure S3">×</button>
+      </div>
+      <img src="Figure_S3.jpg" alt="Figure S3 showing concentration-estimation ranges across sampling densities and spatial length scales">
+      <figcaption>Figure S3 from the manuscript supplement. Select the close button, click outside the figure, or press Escape to return to the calculator.</figcaption>
+    </figure>
+  </dialog>
 
   <footer>Companion prototype to <strong>04_eDNA_survey_planner.R</strong>. This HTML runs entirely in your browser and does not upload data.</footer>
 
@@ -319,6 +340,10 @@
     ids.forEach(id => el[id].addEventListener("input", update));
     document.querySelectorAll("[data-rho]").forEach(button => button.addEventListener("click", () => { el.rho.value = button.dataset.rho; update(); }));
     document.getElementById("reset").addEventListener("click", () => { Object.entries(defaults).forEach(([id, value]) => el[id].value = value); update(); });
+    const epsilonFigure = document.getElementById("epsilonFigure");
+    document.querySelectorAll(".epsilon-help").forEach(button => button.addEventListener("click", () => epsilonFigure.showModal()));
+    document.getElementById("closeFigure").addEventListener("click", () => epsilonFigure.close());
+    epsilonFigure.addEventListener("click", event => { if (event.target === epsilonFigure) epsilonFigure.close(); });
     update();
   </script>
 </body>

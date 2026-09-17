@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - Code/eDNA_survey_planner.html
+      - Code/Figure_S3.jpg
       - .github/workflows/deploy-survey-planner.yml
   workflow_dispatch:
 
@@ -34,6 +35,7 @@ jobs:
         run: |
           mkdir _site
           cp Code/eDNA_survey_planner.html _site/index.html
+          cp Code/Figure_S3.jpg _site/Figure_S3.jpg
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
