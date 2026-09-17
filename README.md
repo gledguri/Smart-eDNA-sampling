@@ -1,5 +1,13 @@
 # Smart eDNA sampling strategies — analysis code
 
+## Interactive survey planner
+
+The browser-based calculator is available at
+[gledguri.github.io/Smart-eDNA-sampling](https://gledguri.github.io/Smart-eDNA-sampling/).
+It converts a target spatial prediction error into sampling effort, or a fixed
+sampling effort into a conditional survey area. Calculations outside the
+manuscript's original density range are shown with an extrapolation warning.
+
 Analysis code for *Smart eDNA sampling strategies*, evaluating how sampling effort affects the accuracy of Gaussian Process (GP) predictions and spatial parameter recovery for environmental DNA (eDNA) surveys. The analysis combines empirical eDNA data from 12 fish species collected along the U.S. West Coast (Guri et al. 2025, Quantitative, Multispecies Monitoring at a Continental Scale. https://doi.org/10.1101/2025.10.30.685180) with simulated spatial fields covering a range of spatial autocorrelation strengths, and progressively thins both to quantify how many samples are needed to reliably estimate spatial structure and predict eDNA concentration.
 
 ## Repository structure
