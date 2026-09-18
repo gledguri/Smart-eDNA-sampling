@@ -85,8 +85,13 @@
     dialog::backdrop { background: rgba(8,30,34,.68); }
     .figure-modal { padding: 22px; }
     .figure-modal-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
-    .figure-modal img { display: block; width: 100%; max-height: 72vh; margin-top: 14px; object-fit: contain; border: 1px solid var(--line); border-radius: 10px; }
-    .figure-modal figcaption { margin-top: 10px; color: var(--muted); font-size: .84rem; }
+    .range-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; margin: 16px 0 10px; }
+    .range-controls .field { margin: 0; }
+    .range-actions { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .range-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
+    .range-results .number { min-height: 82px; }
+    #rangeChart { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .range-note { margin: 10px 0 0; color: var(--muted); font-size: .86rem; }
     .close-modal { flex: none; font-size: 1.1rem; }
     code { color: var(--teal-dark); background: #edf5f3; padding: 2px 5px; border-radius: 5px; }
     footer { padding: 34px 0 54px; color: var(--muted); font-size: .82rem; }
@@ -95,6 +100,7 @@
       .layout { grid-template-columns: 1fr; }
       .controls { position: static; }
       .number-grid { grid-template-columns: 1fr; }
+      .range-controls, .range-results { grid-template-columns: 1fr; }
       .number { min-height: 0; }
     }
   </style>
@@ -113,7 +119,7 @@
       <p class="section-copy">Change any number. Results recalculate as you type.</p>
 
       <div class="field">
-        <label for="epsilon"><span class="label-main">Target prediction error ε <button class="epsilon-help" type="button" aria-label="Open Figure S3 explaining prediction error" title="Open Figure S3">↗</button></span><span>log-scale RMSE</span></label>
+        <label for="epsilon"><span class="label-main">Target prediction error ε <button class="epsilon-help" type="button" aria-label="Open concentration-range calculator" title="Open concentration calculator">↗</button></span><span>log-scale RMSE</span></label>
         <input id="epsilon" type="number" value="0.8" min="0.001" step="0.05">
       </div>
       <div class="field">
@@ -155,7 +161,7 @@
 
     <section class="results" aria-live="polite">
       <article class="card result-card">
-        <div class="result-head"><div><h2>How many samples?</h2><p class="section-copy">For the entered target ε <button class="epsilon-help" type="button" aria-label="Open Figure S3 explaining prediction error" title="Open Figure S3">↗</button> and survey area.</p></div><span class="badge">ε → effort</span></div>
+        <div class="result-head"><div><h2>How many samples?</h2><p class="section-copy">For the entered target ε <button class="epsilon-help" type="button" aria-label="Open concentration-range calculator" title="Open concentration calculator">↗</button> and survey area.</p></div><span class="badge">ε → effort</span></div>
         <div class="number-grid">
           <div class="number"><strong id="requiredDensity">—</strong><span><b class="symbol">E</b>effort: samples / 10,000 km² / stratum</span></div>
           <div class="number"><strong id="requiredPerStratum">—</strong><span><b class="symbol">E/H</b>whole samples per stratum</span></div>
@@ -169,7 +175,7 @@
         <div class="number-grid">
           <div class="number"><strong id="supportedArea">—</strong><span><b class="symbol">A</b>km² per stratum</span></div>
           <div class="number"><strong id="availableDensity">—</strong><span>current samples / 10,000 km² / stratum</span></div>
-          <div class="number"><strong id="expectedError">—</strong><span><b class="symbol">ε</b>expected prediction error for current area and effort <button class="epsilon-help" type="button" aria-label="Open Figure S3 explaining prediction error" title="Open Figure S3">↗</button></span></div>
+          <div class="number"><strong id="expectedError">—</strong><span><b class="symbol">ε</b>expected prediction error for current area and effort <button class="epsilon-help" type="button" aria-label="Open concentration-range calculator" title="Open concentration calculator">↗</button></span></div>
         </div>
         <p id="areaStatus" class="status">Area is a density-equivalent planning value; it does not locate a boundary of reliable inference.</p>
       </article>
@@ -189,14 +195,26 @@
   </main>
 
   <dialog id="epsilonFigure" aria-labelledby="epsilonFigureTitle">
-    <figure class="figure-modal">
+    <section class="figure-modal">
       <div class="figure-modal-head">
-        <div><h2 id="epsilonFigureTitle">Figure S3</h2><p class="section-copy">Simulation results underlying the prediction-error calibration.</p></div>
-        <button id="closeFigure" class="close-modal" type="button" aria-label="Close Figure S3">×</button>
+        <div><h2 id="epsilonFigureTitle">Concentration range from ε</h2><p class="section-copy">Interactive version of the transformation used for Figure S3.</p></div>
+        <button id="closeFigure" class="close-modal" type="button" aria-label="Close concentration calculator">×</button>
       </div>
-      <img src="Figure_S3.jpg" alt="Figure S3 showing concentration-estimation ranges across sampling densities and spatial length scales">
-      <figcaption>Figure S3 from the manuscript supplement. Select the close button, click outside the figure, or press Escape to return to the calculator.</figcaption>
-    </figure>
+      <div class="range-controls">
+        <div class="field"><label for="rangeConcentration">Concentration <span>copies/L</span></label><input id="rangeConcentration" type="number" value="100" min="0.000001" step="10"></div>
+        <div class="field"><label for="rangeEpsilon">Prediction error ε <span>log scale</span></label><input id="rangeEpsilon" type="number" value="0.8" min="0.001" step="0.05"></div>
+        <div class="field"><label for="rangeRho">Spatial scale ρ <span>km</span></label><input id="rangeRho" type="number" value="100" min="25" step="25"></div>
+      </div>
+      <div class="range-actions"><button id="usePlannerValues" type="button">Use planner ε and ρ</button><span class="section-copy">ρ records the spatial scenario; ε determines this concentration range.</span></div>
+      <div class="range-results">
+        <div class="number"><strong id="rangeLower">—</strong><span>lower concentration</span></div>
+        <div class="number"><strong id="rangeCenter">—</strong><span>input concentration</span></div>
+        <div class="number"><strong id="rangeUpper">—</strong><span>upper concentration</span></div>
+      </div>
+      <svg id="rangeChart" viewBox="0 0 820 330" role="img" aria-label="Normal distribution on the log-concentration scale with the epsilon range highlighted"></svg>
+      <p id="rangeExplanation" class="range-note">—</p>
+      <p class="range-note"><strong>Interpretation.</strong> Figure S3 uses <code>exp(log(C) − ε)</code> and <code>exp(log(C) + ε)</code>. The curve assumes normally distributed error on the log scale, so concentration is lognormal in copies/L. The bounds show ±1 ε (about 68% only under that normal-error assumption); they are not absolute biological minima and maxima.</p>
+    </section>
   </dialog>
 
   <footer>Companion prototype to <strong>04_eDNA_survey_planner.R</strong>. This HTML runs entirely in your browser and does not upload data.</footer>
@@ -341,9 +359,61 @@
     document.querySelectorAll("[data-rho]").forEach(button => button.addEventListener("click", () => { el.rho.value = button.dataset.rho; update(); }));
     document.getElementById("reset").addEventListener("click", () => { Object.entries(defaults).forEach(([id, value]) => el[id].value = value); update(); });
     const epsilonFigure = document.getElementById("epsilonFigure");
-    document.querySelectorAll(".epsilon-help").forEach(button => button.addEventListener("click", () => epsilonFigure.showModal()));
+    const range = {
+      concentration: document.getElementById("rangeConcentration"),
+      epsilon: document.getElementById("rangeEpsilon"),
+      rho: document.getElementById("rangeRho"),
+      lower: document.getElementById("rangeLower"),
+      center: document.getElementById("rangeCenter"),
+      upper: document.getElementById("rangeUpper"),
+      explanation: document.getElementById("rangeExplanation")
+    };
+    function syncRangeFromPlanner() {
+      range.epsilon.value = el.epsilon.value;
+      range.rho.value = el.rho.value;
+      updateRange();
+    }
+    function updateRange() {
+      const c = Number(range.concentration.value), epsilon = Number(range.epsilon.value), rho = Number(range.rho.value);
+      if (!finitePositive(c, epsilon, rho)) {
+        [range.lower, range.center, range.upper].forEach(node => node.textContent = "—");
+        range.explanation.textContent = "Enter positive values for concentration, ε, and ρ.";
+        drawRangeChart(NaN, NaN);
+        return;
+      }
+      const lower = Math.exp(Math.log(c) - epsilon), upper = Math.exp(Math.log(c) + epsilon);
+      range.lower.textContent = fmt(lower, 2);
+      range.center.textContent = fmt(c, 2);
+      range.upper.textContent = fmt(upper, 2);
+      range.explanation.textContent = `For C = ${fmt(c, 2)} copies/L and ε = ${fmt(epsilon, 3)}, Figure S3's transformation gives ${fmt(lower, 2)}–${fmt(upper, 2)} copies/L (a multiplicative factor of ÷/× ${fmt(Math.exp(epsilon), 2)}). The selected ρ = ${fmt(rho, 0)} km describes the spatial scenario but does not change this range once ε is fixed.`;
+      drawRangeChart(c, epsilon);
+    }
+    function drawRangeChart(c, epsilon) {
+      const svg = document.getElementById("rangeChart"), NS = "http://www.w3.org/2000/svg";
+      svg.replaceChildren();
+      if (!finitePositive(c, epsilon)) return;
+      const W = 820, H = 330, m = {l:70, r:24, t:25, b:62};
+      const zMin = -3.5, zMax = 3.5;
+      const x = z => m.l + (z-zMin)/(zMax-zMin)*(W-m.l-m.r);
+      const density = z => Math.exp(-0.5*z*z);
+      const y = d => H-m.b-d*(H-m.t-m.b)*0.92;
+      const add = (name, attrs, text) => { const node=document.createElementNS(NS,name); Object.entries(attrs||{}).forEach(([k,v])=>node.setAttribute(k,v)); if(text!=null)node.textContent=text; svg.appendChild(node); return node; };
+      add("rect", {x:x(-1), y:m.t, width:x(1)-x(-1), height:H-m.t-m.b, class:"support-band"});
+      [-1,0,1].forEach((z,i) => add("line", {x1:x(z),x2:x(z),y1:m.t,y2:H-m.b,class:i===1?"recommend":"support-edge"}));
+      const zs=Array.from({length:181},(_,i)=>zMin+i*(zMax-zMin)/180);
+      add("path", {d:zs.map((z,i)=>`${i?"L":"M"}${x(z).toFixed(2)},${y(density(z)).toFixed(2)}`).join(" "),class:"curve"});
+      add("line", {x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,class:"axis"});
+      [-3,-2,-1,0,1,2,3].forEach(z=>{const value=c*Math.exp(z*epsilon);add("line",{x1:x(z),x2:x(z),y1:H-m.b,y2:H-m.b+6,class:"axis"});add("text",{x:x(z),y:H-m.b+23,"text-anchor":"middle",class:"chart-text"},fmt(value,value<10?2:0));});
+      add("text",{x:(m.l+W-m.r)/2,y:H-13,"text-anchor":"middle",class:"chart-title"},"Concentration (copies/L; logarithmic spacing)");
+      add("text",{x:x(0),y:m.t+17,"text-anchor":"middle",class:"chart-title"},`C = ${fmt(c,2)}`);
+      add("text",{x:(x(-1)+x(1))/2,y:H-m.b-12,"text-anchor":"middle",class:"chart-text"},"Figure S3 range: −ε to +ε");
+    }
+    document.querySelectorAll(".epsilon-help").forEach(button => button.addEventListener("click", () => { syncRangeFromPlanner(); epsilonFigure.showModal(); }));
     document.getElementById("closeFigure").addEventListener("click", () => epsilonFigure.close());
     epsilonFigure.addEventListener("click", event => { if (event.target === epsilonFigure) epsilonFigure.close(); });
+    [range.concentration, range.epsilon, range.rho].forEach(node => node.addEventListener("input", updateRange));
+    document.getElementById("usePlannerValues").addEventListener("click", syncRangeFromPlanner);
+    updateRange();
     update();
   </script>
 </body>
