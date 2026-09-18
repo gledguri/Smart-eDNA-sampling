@@ -85,7 +85,7 @@
     dialog::backdrop { background: rgba(8,30,34,.68); }
     .figure-modal { padding: 22px; }
     .figure-modal-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
-    .range-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; margin: 16px 0 10px; }
+    .range-controls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; margin: 16px 0 10px; }
     .range-controls .field { margin: 0; }
     .range-actions { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
     .range-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
@@ -203,9 +203,8 @@
       <div class="range-controls">
         <div class="field"><label for="rangeConcentration">Concentration <span>copies/L</span></label><input id="rangeConcentration" type="number" value="100" min="0.000001" step="10"></div>
         <div class="field"><label for="rangeEpsilon">Prediction error ε <span>log scale</span></label><input id="rangeEpsilon" type="number" value="0.8" min="0.001" step="0.05"></div>
-        <div class="field"><label for="rangeRho">Spatial scale ρ <span>km</span></label><input id="rangeRho" type="number" value="100" min="25" step="25"></div>
       </div>
-      <div class="range-actions"><button id="usePlannerValues" type="button">Use planner ε and ρ</button><span class="section-copy">ρ records the spatial scenario; ε determines this concentration range.</span></div>
+      <div class="range-actions"><button id="usePlannerValues" type="button">Use planner ε</button><span class="section-copy">Only concentration and ε determine this range.</span></div>
       <div class="range-results">
         <div class="number"><strong id="rangeLower">—</strong><span>lower concentration</span></div>
         <div class="number"><strong id="rangeCenter">—</strong><span>input concentration</span></div>
@@ -362,7 +361,6 @@
     const range = {
       concentration: document.getElementById("rangeConcentration"),
       epsilon: document.getElementById("rangeEpsilon"),
-      rho: document.getElementById("rangeRho"),
       lower: document.getElementById("rangeLower"),
       center: document.getElementById("rangeCenter"),
       upper: document.getElementById("rangeUpper"),
@@ -370,14 +368,13 @@
     };
     function syncRangeFromPlanner() {
       range.epsilon.value = el.epsilon.value;
-      range.rho.value = el.rho.value;
       updateRange();
     }
     function updateRange() {
-      const c = Number(range.concentration.value), epsilon = Number(range.epsilon.value), rho = Number(range.rho.value);
-      if (!finitePositive(c, epsilon, rho)) {
+      const c = Number(range.concentration.value), epsilon = Number(range.epsilon.value);
+      if (!finitePositive(c, epsilon)) {
         [range.lower, range.center, range.upper].forEach(node => node.textContent = "—");
-        range.explanation.textContent = "Enter positive values for concentration, ε, and ρ.";
+        range.explanation.textContent = "Enter positive values for concentration and ε.";
         drawRangeChart(NaN, NaN);
         return;
       }
@@ -385,7 +382,7 @@
       range.lower.textContent = fmt(lower, 2);
       range.center.textContent = fmt(c, 2);
       range.upper.textContent = fmt(upper, 2);
-      range.explanation.textContent = `For C = ${fmt(c, 2)} copies/L and ε = ${fmt(epsilon, 3)}, Figure S3's transformation gives ${fmt(lower, 2)}–${fmt(upper, 2)} copies/L (a multiplicative factor of ÷/× ${fmt(Math.exp(epsilon), 2)}). The selected ρ = ${fmt(rho, 0)} km describes the spatial scenario but does not change this range once ε is fixed.`;
+      range.explanation.textContent = `For C = ${fmt(c, 2)} copies/L and ε = ${fmt(epsilon, 3)}, Figure S3's transformation gives ${fmt(lower, 2)}–${fmt(upper, 2)} copies/L (a multiplicative factor of ÷/× ${fmt(Math.exp(epsilon), 2)}).`;
       drawRangeChart(c, epsilon);
     }
     function drawRangeChart(c, epsilon) {
@@ -411,7 +408,7 @@
     document.querySelectorAll(".epsilon-help").forEach(button => button.addEventListener("click", () => { syncRangeFromPlanner(); epsilonFigure.showModal(); }));
     document.getElementById("closeFigure").addEventListener("click", () => epsilonFigure.close());
     epsilonFigure.addEventListener("click", event => { if (event.target === epsilonFigure) epsilonFigure.close(); });
-    [range.concentration, range.epsilon, range.rho].forEach(node => node.addEventListener("input", updateRange));
+    [range.concentration, range.epsilon].forEach(node => node.addEventListener("input", updateRange));
     document.getElementById("usePlannerValues").addEventListener("click", syncRangeFromPlanner);
     updateRange();
     update();
