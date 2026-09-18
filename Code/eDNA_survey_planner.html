@@ -110,7 +110,7 @@
     <div class="eyebrow">Interactive planning prototype</div>
     <h1>Plan spatial eDNA sampling from prediction error</h1>
     <p class="lede">Enter a target prediction error, spatial autocorrelation length, survey area, and sampling budget. The calculator updates the manuscript equation immediately and keeps every result on a per-stratum basis.</p>
-    <div class="notice"><strong>Exploratory manuscript calibration.</strong> ε is RMSE on the natural-log response scale against a fitted reference map. It is not percent error, detection probability, or a confidence level. The equation now calculates beyond the original density range of 3.58–20; those results are clearly marked as extrapolations.</div>
+    <div class="notice"><strong>Exploratory manuscript calibration.</strong> The default coefficients come from the main simulation fit using 2,000, 1,000, 600, and 350 samples (350 is represented as 358 when calculating density), compared with the 4,000-sample fitted reference map. They are not coefficients from the separate ≤358-sample analysis. ε is RMSE on the natural-log response scale; it is not percent error, detection probability, or a confidence level. The equation now calculates beyond the fitted density range of 3.58–20 samples per 10,000 km² per stratum; those results are clearly marked as extrapolations.</div>
   </header>
 
   <main class="layout">
@@ -148,7 +148,7 @@
 
       <details>
         <summary>Advanced equation coefficients</summary>
-        <p class="section-copy">Rounded manuscript values. Change only when you have a documented replacement calibration.</p>
+        <p class="section-copy">Rounded values from the main 4,000-reference simulation analysis (fitted observations: N = 2,000, 1,000, 600, and 358). Change only when you have a documented replacement calibration.</p>
         <div class="coeff-grid">
           <div class="field"><label for="omega">ω</label><input id="omega" type="number" value="1.65" step="0.001"></div>
           <div class="field"><label for="beta">β</label><input id="beta" type="number" value="-0.176" step="0.001"></div>
