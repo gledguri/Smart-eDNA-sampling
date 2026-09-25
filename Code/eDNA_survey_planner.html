@@ -142,7 +142,7 @@
     <div class="eyebrow">Interactive planning prototype</div>
     <h1>Plan spatial eDNA sampling from prediction error</h1>
     <p class="lede">Enter a target prediction error, spatial autocorrelation length, survey area, and sampling budget. The calculator updates the manuscript equation immediately and keeps every result on a per-stratum basis.</p>
-    <div class="notice"><strong>Exploratory manuscript calibration.</strong> The default coefficients come from the main simulation fit using 2,000, 1,000, 600, and 350 samples (350 is represented as 358 when calculating density), compared with the 4,000-sample fitted reference map. They are not coefficients from the separate ≤358-sample analysis. ε is RMSE on the natural-log response scale; it is not percent error, detection probability, or a confidence level. The equation now calculates beyond the fitted density range of 3.58–20 samples per 10,000 km² per stratum; those results are clearly marked as extrapolations.</div>
+    <div class="notice"><strong>Exploratory manuscript calibration.</strong> The default coefficients come from the main simulation fit using 2,000, 1,000, 600, 358, 330, 300, 260, 220, and 150 samples, compared with the 4,000-sample fitted reference map. The simulation used 350 internally and represented it as 358 when calculating density to match the empirical survey. This is the 4,000-reference analysis, not the separate analysis benchmarked against the 358-sample reconstruction. ε is RMSE on the natural-log response scale; it is not percent error, detection probability, or a confidence level. The equation now calculates beyond the fitted density range of 1.5–20 samples per 10,000 km² per stratum; those results are clearly marked as extrapolations.</div>
   </header>
 
   <main class="layout">
@@ -163,7 +163,7 @@
 </div>
       <details>
         <summary>Advanced equation coefficients</summary>
-        <p class="section-copy">Rounded values from the main 4,000-reference simulation analysis (fitted observations: N = 2,000, 1,000, 600, and 358). Change only when you have a documented replacement calibration.</p>
+        <p class="section-copy">Rounded values from the main 4,000-reference simulation analysis (fitted observations: N = 2,000, 1,000, 600, 358, 330, 300, 260, 220, and 150). Change only when you have a documented replacement calibration.</p>
         <div class="coeff-grid">
           <div class="field"><label for="omega">ω</label><input id="omega" type="number" value="1.65" step="0.001"></div>
           <div class="field"><label for="beta">β</label><input id="beta" type="number" value="-0.176" step="0.001"></div>
@@ -233,7 +233,7 @@
       </article>
 
       <article class="card chart-card">
-        <div class="result-head"><div><h2>How many samples? · Error–effort curve</h2><p class="section-copy">Blue: fitted equation. Orange: target and required density. Shading: original density range.</p></div><span id="rhoBadge" class="badge">ρ = 100 km</span></div>
+        <div class="result-head"><div><h2>How many samples? · Error–effort curve</h2><p class="section-copy">Blue: fitted equation. Orange: target and required density. Shading: fitted density range.</p></div><span id="rhoBadge" class="badge">ρ = 100 km</span></div>
         <svg id="chart" viewBox="0 0 720 400" role="img" aria-label="Prediction error as a function of sampling density"></svg>
       </article>
 
@@ -267,7 +267,7 @@
         <h2>How to read the result</h2>
         <p id="interpretation">—</p>
         <p>If every station supplies every stratum, the required station count equals the samples per stratum. The total shown above counts all site-stratum observations. Filters, PCR replicates, and repeated visits are separate effort types.</p>
-        <p>The equation used is <code>log(ε) = ω + β log(E) + θ log(ρ) + γ log(E) log(ρ)</code>. Its original support is ρ = 25–1,000 km and E = 3.58–20 samples per 10,000 km² per stratum. Calculations outside the E range extend the fitted formula and carry an extrapolation warning.</p>
+        <p>The equation used is <code>log(ε) = ω + β log(E) + θ log(ρ) + γ log(E) log(ρ)</code>. Its fitted support is ρ = 25–1,000 km and E = 1.5–20 samples per 10,000 km² per stratum. Calculations outside the E range extend the fitted formula and carry an extrapolation warning.</p>
       </article>
     </section>
   </main>
@@ -303,7 +303,7 @@
     const outputIds = ["requiredDensity", "requiredPerStratum", "requiredTotal", "supportedArea", "availableDensity", "expectedError", "sampleStatus", "areaStatus", "interpretation", "rhoBadge"];
     const out = Object.fromEntries(outputIds.map(id => [id, document.getElementById(id)]));
     const defaults = { omega: 1.65, beta: -0.176, theta: -0.228, gamma: -0.0684 };
-    const support = { rhoMin: 25, rhoMax: 1000, densityMin: 3.58, densityMax: 20 };
+    const support = { rhoMin: 25, rhoMax: 1000, densityMin: 1.5, densityMax: 20 };
 
     function read() {
       return Object.fromEntries(ids.map(id => [id, Number(el[id].value)]));
@@ -464,8 +464,8 @@
       let sampleMessage = "The target falls within the calibrated density range.";
       let sampleWarn = !rhoSupported;
       if (!rhoSupported) sampleMessage = `ρ is outside the supported 25–1,000 km range. ${sampleMessage}`;
-      if (req.status === "extrapolated_high") { sampleMessage = `The formula requires E ≈ ${fmt(req.density)}, beyond the original maximum of 20. Treat the count as an extrapolation requiring validation.`; sampleWarn = true; }
-      if (req.status === "extrapolated_low") { sampleMessage = `The formula requires E ≈ ${fmt(req.density)}, below the original minimum of 3.58. Treat the count as an extrapolation requiring validation.`; sampleWarn = true; }
+      if (req.status === "extrapolated_high") { sampleMessage = `The formula requires E ≈ ${fmt(req.density)}, beyond the fitted maximum of 20. Treat the count as an extrapolation requiring validation.`; sampleWarn = true; }
+      if (req.status === "extrapolated_low") { sampleMessage = `The formula requires E ≈ ${fmt(req.density)}, below the fitted minimum of 1.5. Treat the count as an extrapolation requiring validation.`; sampleWarn = true; }
       if (req.status === "nondecreasing") { sampleMessage = "These coefficients do not produce a safely decreasing error curve, so the equation cannot be inverted."; sampleWarn = true; }
       setStatus(out.sampleStatus, sampleMessage, sampleWarn);
 
@@ -510,7 +510,7 @@
         add("rect", {x:x(bandLeft), y:m.t, width:x(bandRight)-x(bandLeft), height:H-m.t-m.b, class:"support-band"});
         add("line", {x1:x(bandLeft), x2:x(bandLeft), y1:m.t, y2:H-m.b, class:"support-edge"});
         add("line", {x1:x(bandRight), x2:x(bandRight), y1:m.t, y2:H-m.b, class:"support-edge"});
-        add("text", {x:(x(bandLeft)+x(bandRight))/2, y:m.t+16, "text-anchor":"middle", class:"chart-text"}, "original density range");
+        add("text", {x:(x(bandLeft)+x(bandRight))/2, y:m.t+16, "text-anchor":"middle", class:"chart-text"}, "fitted density range");
       }
       xTicks.forEach(t => { add("line", {x1:x(t), x2:x(t), y1:m.t, y2:H-m.b, class:"grid"}); add("text", {x:x(t), y:H-m.b+22, "text-anchor":"middle", class:"chart-text"}, fmt(t,0)); });
       yTicks.forEach(t => { add("line", {x1:m.l, x2:W-m.r, y1:y(t), y2:y(t), class:"grid"}); add("text", {x:m.l-10, y:y(t)+4, "text-anchor":"end", class:"chart-text"}, fmt(t,2)); });
