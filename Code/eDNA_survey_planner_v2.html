@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>eDNA survey planner</title>
+  <style>
+    :root {
+      --ink: #102a2e;
+      --muted: #587074;
+      --paper: #fbfaf6;
+      --card: #ffffff;
+      --teal: #006d77;
+      --teal-dark: #004d55;
+      --orange: #d45b24;
+      --pale: #e5f2f1;
+      --line: #d8e2df;
+      --warn: #8b3d18;
+      --warn-bg: #fff2e9;
+      --shadow: 0 16px 40px rgba(16, 42, 46, 0.09);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 90% 0%, rgba(0,109,119,.11), transparent 32rem),
+        linear-gradient(180deg, #f2f7f5 0, var(--paper) 34rem);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    header, main, footer { width: min(1160px, calc(100% - 32px)); margin-inline: auto; }
+    header { padding: 56px 0 32px; }
+    .eyebrow { color: var(--teal); font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { max-width: 820px; margin: 8px 0 14px; font-family: Georgia, serif; font-size: clamp(2.25rem, 5vw, 4.5rem); font-weight: 500; line-height: 1.02; letter-spacing: -.035em; }
+    .lede { max-width: 760px; margin: 0; color: var(--muted); font-size: 1.08rem; }
+    .notice { margin-top: 24px; max-width: 900px; padding: 14px 16px; border-left: 4px solid var(--orange); background: var(--warn-bg); color: #653119; border-radius: 4px 10px 10px 4px; }
+    .layout { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start; }
+    .card { background: var(--card); border: 1px solid rgba(16,42,46,.09); border-radius: 18px; box-shadow: var(--shadow); }
+    .controls { padding: 24px; }
+    h2 { margin: 0 0 4px; font-family: Georgia, serif; font-size: 1.55rem; font-weight: 500; }
+    .section-copy { margin: 0 0 20px; color: var(--muted); font-size: .92rem; }
+    .field { margin: 0 0 17px; }
+    label { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: .9rem; font-weight: 750; }
+    label span { color: var(--muted); font-weight: 500; }
+    .label-main { display: inline-flex; align-items: center; gap: 7px; }
+    .epsilon-help { display: inline-grid; place-items: center; width: 23px; height: 23px; padding: 0; border-radius: 50%; font-size: .9rem; line-height: 1; }
+    input[type="number"] { width: 100%; border: 1px solid #b9ccc8; border-radius: 10px; background: #fff; color: var(--ink); padding: 11px 12px; font: inherit; font-variant-numeric: tabular-nums; }
+    input:focus { outline: 3px solid rgba(0,109,119,.16); border-color: var(--teal); }
+    .presets { display: flex; gap: 7px; flex-wrap: wrap; margin: -6px 0 19px; }
+    button { border: 1px solid #a9c2bd; border-radius: 999px; background: #f8fbfa; color: var(--teal-dark); padding: 7px 11px; cursor: pointer; font: 700 .78rem/1 inherit; }
+    button:hover, button.active { border-color: var(--teal); background: var(--pale); }
+    details { border-top: 1px solid var(--line); margin-top: 19px; padding-top: 16px; }
+    summary { cursor: pointer; color: var(--teal-dark); font-weight: 750; }
+    .coeff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 13px; }
+    .coeff-grid .field { margin: 0; }
+    .coeff-grid label { font-size: .78rem; }
+    .reset { margin-top: 13px; }
+    .results { display: grid; gap: 24px; }
+    .result-card { padding: 25px; }
+    .result-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
+    .badge { flex: none; border-radius: 999px; background: var(--pale); color: var(--teal-dark); padding: 5px 10px; font-size: .74rem; font-weight: 800; letter-spacing: .03em; }
+    .number-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0 8px; }
+    .number { padding: 16px; background: #f4f8f7; border-radius: 12px; min-height: 105px; }
+    .number strong { display: block; color: var(--teal-dark); font-family: Georgia, serif; font-size: clamp(1.55rem, 3vw, 2.35rem); font-weight: 500; line-height: 1.05; font-variant-numeric: tabular-nums; }
+    .number span { display: block; margin-top: 7px; color: var(--muted); font-size: .78rem; line-height: 1.3; }
+    .symbol { display: inline-block; margin-right: 5px; color: var(--teal-dark); font-family: Georgia, serif; font-size: 1rem; font-weight: 700; }
+    .status { margin: 14px 0 0; padding: 10px 12px; border-radius: 9px; background: var(--pale); color: var(--teal-dark); font-size: .86rem; }
+    .status.warn { background: var(--warn-bg); color: var(--warn); }
+    .chart-card { padding: 25px; overflow: hidden; }
+    #chart { width: 100%; height: auto; min-height: 320px; display: block; }
+    .simulation { margin: 0; }
+    .result-with-input { min-width: 0; display: grid; grid-template-rows: subgrid; grid-row: span 2; }
+    .result-with-input .field { margin: 2px 0 0; display: flex; flex-direction: column; }
+    .result-with-input label { flex: 1; flex-wrap: wrap; align-content: start; gap: 2px 8px; }
+    .area-question { margin: 0; }
+    .area-question > summary h2 { display: inline; color: var(--ink); }
+    .area-question > summary .badge { float: right; }
+    .area-question > .section-copy { margin-top: 12px; }
+    .simulation h3 { margin: 20px 0 4px; font-size: 1rem; }
+    .sim-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+    .sim-plot { width: 100%; display: block; }
+    .sim-scroll { overflow-x: auto; }
+    .sim-scroll svg { min-width: 480px; }
+    .sim-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .82rem; }
+    .axis { stroke: #6c7f80; stroke-width: 1; }
+    .grid { stroke: #dce6e3; stroke-width: 1; }
+    .curve { fill: none; stroke: var(--teal); stroke-width: 4; stroke-linecap: round; }
+    .density-area { fill: rgba(0,109,119,.13); stroke: none; }
+    .target { stroke: var(--orange); stroke-width: 2; stroke-dasharray: 7 6; }
+    .recommend { stroke: var(--orange); stroke-width: 2; stroke-dasharray: 2 6; }
+    .support-band { fill: rgba(0,109,119,.08); }
+    .support-edge { stroke: var(--teal); stroke-width: 1; stroke-dasharray: 3 5; opacity: .65; }
+    .curve-handle { cursor: grab; touch-action: none; }
+    #chart:has(.curve-handle):active { cursor: grabbing; }
+    .point { fill: var(--orange); stroke: white; stroke-width: 3; }
+    .chart-text { fill: var(--muted); font-size: 12px; font-family: inherit; }
+    .chart-title { fill: var(--ink); font-size: 13px; font-weight: 750; font-family: inherit; }
+    .interpretation { padding: 24px 25px; }
+    .interpretation p { color: var(--muted); margin: 8px 0 0; }
+    dialog { width: min(920px, calc(100% - 28px)); max-height: calc(100vh - 36px); padding: 0; border: 0; border-radius: 18px; box-shadow: 0 22px 70px rgba(16,42,46,.28); }
+    dialog::backdrop { background: rgba(8,30,34,.68); }
+    .figure-modal { padding: 22px; }
+    .figure-modal-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
+    .range-controls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; margin: 16px 0 10px; }
+    .range-controls .field { margin: 0; }
+    .range-actions { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .range-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
+    .range-results .number { min-height: 82px; }
+    #rangeChart { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .range-note { margin: 10px 0 0; color: var(--muted); font-size: .86rem; }
+    .close-modal { flex: none; font-size: 1.1rem; }
+    code { color: var(--teal-dark); background: #edf5f3; padding: 2px 5px; border-radius: 5px; }
+    footer { padding: 34px 0 54px; color: var(--muted); font-size: .82rem; }
+    @media (max-width: 820px) {
+      header { padding-top: 34px; }
+      .layout { grid-template-columns: 1fr; }
+      .controls { position: static; }
+      .number-grid { grid-template-columns: 1fr; }
+      .range-controls, .range-results { grid-template-columns: 1fr; }
+      .number { min-height: 0; }
+    }
+    .question-body { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 26px; align-items: start; }
+    .question-inputs { padding: 20px; border-radius: 12px; background: #f0f6f4; border-left: 4px solid var(--teal); }
+    .question-inputs h3 { margin: 0 0 18px; font-size: .95rem; }
+    .shared-fields { max-width: 650px; }
+    .slider-field { position: relative; }
+    input[type="range"] { width: 100%; accent-color: var(--teal); cursor: ew-resize; min-height: 32px; }
+    .slider-ends { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); }
+    .error-preview { position: absolute; bottom: calc(100% + 8px); left: 0; width: min(420px, calc(100vw - 86px)); padding: 14px; background: white; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 35px #102a2e30; z-index: 10; }
+    .error-preview[hidden] { display: none; }
+    .preview-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+    .preview-close { flex: none; display: inline-grid; place-items: center; width: 25px; height: 25px; padding: 0; font-size: 1rem; }
+    .error-preview svg { width: 100%; display: block; }
+    .error-preview p { font-size: .75rem; margin: 6px 0; color: var(--muted); }
+    .preview-values { display: flex; justify-content: space-between; gap: 8px; font-size: .8rem; font-variant-numeric: tabular-nums; }
+    .epsilon-label-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .epsilon-label-row label { margin: 0; }
+    .epsilon-value-controls { display: flex; align-items: center; gap: 6px; }
+    .epsilon-value-controls output { min-width: 3rem; text-align: right; font-weight: 750; font-variant-numeric: tabular-nums; }
+    .epsilon-edit { padding: 5px 9px; }
+    input.epsilon-entry { width: 92px; padding: 6px 8px; }
+    .question-output .number-grid { margin-top: 0; }
+    @media (max-width: 900px) { .question-body { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="eyebrow">Interactive planning prototype</div>
+    <h1>Plan spatial eDNA sampling from prediction error</h1>
+    <p class="lede">Enter a target prediction error, spatial autocorrelation length, survey area, and sampling budget. The calculator updates the manuscript equation immediately and keeps every result on a per-stratum basis.</p>
+    <div class="notice"><strong>Exploratory manuscript calibration.</strong> The default coefficients come from the main simulation fit using 2,000, 1,000, 600, 358, 330, 300, 260, 220, and 150 samples, compared with the 4,000-sample fitted reference map. The simulation used 350 internally and represented it as 358 when calculating density to match the empirical survey. This is the 4,000-reference analysis, not the separate analysis benchmarked against the 358-sample reconstruction. ε is RMSE on the natural-log response scale; it is not percent error, detection probability, or a confidence level. The equation now calculates beyond the fitted density range of 1.5–20 samples per 10,000 km² per stratum; those results are clearly marked as extrapolations.</div>
+  </header>
+
+  <main class="layout">
+    <aside class="card controls" aria-label="Shared assumptions">
+      <h2>Shared assumptions</h2>
+      <p class="section-copy">Spatial length scale and equation coefficients apply to both questions. Each question has its own scenario inputs below.</p>
+
+      <div class="shared-fields">      <div class="field">
+        <label for="rho">Spatial length scale ρ <span>km</span></label>
+        <input id="rho" type="number" value="100" min="25" max="1000" step="25">
+      </div>      <div class="presets" aria-label="Length scale presets">
+        <button type="button" data-rho="25">Very patchy · 25 km</button>
+        <button type="button" data-rho="50">Patchy · 50 km</button>
+        <button type="button" data-rho="100" class="active">Moderate · 100 km</button>
+        <button type="button" data-rho="500">Smooth · 500 km</button>
+        <button type="button" data-rho="1000">Very smooth · 1,000 km</button>
+      </div>
+</div>
+      <details>
+        <summary>Advanced equation coefficients</summary>
+        <p class="section-copy">Rounded values from the main 4,000-reference simulation analysis (fitted observations: N = 2,000, 1,000, 600, 358, 330, 300, 260, 220, and 150). Change only when you have a documented replacement calibration.</p>
+        <div class="coeff-grid">
+          <div class="field"><label for="omega">ω</label><input id="omega" type="number" value="1.65" step="0.001"></div>
+          <div class="field"><label for="beta">β</label><input id="beta" type="number" value="-0.176" step="0.001"></div>
+          <div class="field"><label for="theta">θ</label><input id="theta" type="number" value="-0.228" step="0.001"></div>
+          <div class="field"><label for="gamma">γ</label><input id="gamma" type="number" value="-0.0684" step="0.001"></div>
+        </div>
+        <button id="reset" class="reset" type="button">Reset coefficients</button>
+      </details>
+    </aside>
+
+    <section class="results" aria-live="polite">
+      <article class="card result-card">
+        <div class="result-head"><div><h2>How many samples?</h2><p class="section-copy">Choose a target error and survey area to calculate the samples needed.</p></div><span class="badge">ε → effort</span></div>
+        <div class="question-body"><div class="question-inputs"><h3>Inputs for this question</h3><div class="field slider-field">
+        <div id="epsilonPreview" class="error-preview" hidden role="region" aria-label="Illustrative lognormal concentration distribution">
+          <div class="preview-head"><strong>Concentration prediction spread between the predicted and the true on average across a studied domain</strong><button class="preview-close" type="button" aria-label="Close concentration preview">×</button></div>
+          <svg viewBox="0 0 400 190" role="img" aria-label="Lognormal curve on a fixed concentration axis from 0 to 500 copies per litre"></svg>
+          <div class="preview-values"></div>
+          <p class="sigma-note"></p>
+          <p>Assuming the true concentration was at 100 copies/L.</p>
+        </div>
+        <div class="epsilon-label-row"><label for="epsilon">Target prediction error ε</label><div class="epsilon-value-controls"><output id="epsilonValue" for="epsilon">0.80</output><button class="epsilon-edit" type="button" data-edit-epsilon="epsilon">Edit</button><input id="epsilonEntry" class="epsilon-entry" type="number" min="0.05" max="5" step="0.01" value="0.80" aria-label="Type target prediction error for samples calculation" hidden></div></div>
+        <input id="epsilon" type="range" value="0.8" min="0.05" max="5" step="0.01" aria-describedby="epsilonHint" aria-controls="epsilonPreview">
+        <div class="slider-ends"><span>0.05 · lower error</span><span>5.00 · higher error</span></div>
+        <p id="epsilonHint" class="range-note">Log-scale RMSE. Drag or use arrow keys to preview the spread.</p>
+      </div>            </div><div class="question-output">
+        <div class="number-grid">
+          <div class="number"><strong id="requiredDensity">—</strong><span><b class="symbol">E</b>effort: samples / 10,000 km² / stratum</span></div>
+          <div class="result-with-input"><div class="number"><strong id="requiredPerStratum">—</strong><span><b class="symbol">E/H</b>whole samples per stratum</span></div>
+          <div class="field">
+        <label for="area">Survey area <span>km² per stratum</span></label>
+        <input id="area" type="number" value="50000" min="1" step="1000">
+      </div></div>
+          <div class="result-with-input"><div class="number"><strong id="requiredTotal">—</strong><span><b class="symbol">N</b>total site-stratum observations</span></div>
+          <div class="field">
+        <label for="strata">Number of strata H <span>e.g. depth layers</span></label>
+        <input id="strata" type="number" value="5" min="1" step="1">
+      </div></div>
+        </div>
+        <p id="sampleStatus" class="status">Enter a valid scenario.</p>
+        </div></div>
+      </article>
+
+
+      <article class="card chart-card">
+        <div class="result-head"><div><h2>Error–effort curve</h2><p class="section-copy">Blue: fitted equation. Orange: target and required density. Shading: fitted density range. Drag the orange dot along the curve to adjust the target error.</p></div><span id="rhoBadge" class="badge">ρ = 100 km</span></div>
+        <svg id="chart" viewBox="0 0 720 400" role="img" aria-label="Prediction error as a function of sampling density"></svg>
+      </article>
+
+      <article id="simulation" class="card chart-card simulation">
+        <div class="result-head"><h2>Prediction error (illustration in 1-dimension)</h2></div>
+        <div class="sim-actions">
+          <button id="newField" type="button">Generate a new field</button>
+          <button id="newSamples" type="button">Reshuffle sample locations</button>
+          <button id="lessSamples" type="button" aria-pressed="false">Compare with ¼ of the samples</button>
+        </div>
+        <p id="simStatus" class="status"></p>
+        <div class="sim-legend"><span>━━ True field</span><span style="color:#d62839">┈┈ Predicted</span><span style="color:#e8871a">● Simulated data</span><span style="color:#527e24">● Samples used</span></div>
+        <h3>1. Simulated true concentration and simulated data</h3>
+        <div class="sim-scroll"><svg id="truthChart" class="sim-plot" viewBox="0 0 720 280" role="img" aria-label="Simulated true concentration and noisy observations"></svg></div>
+        <h3>2. Predicted vs true concentration from the samples ε requires</h3>
+        <div class="sim-scroll"><svg id="reconstructionChart" class="sim-plot" viewBox="0 0 720 280" role="img" aria-label="Estimated concentration with lower and upper bounds set directly by epsilon"></svg></div>
+        <p id="simResult" class="range-note"></p>
+        <p class="range-note"><strong>Educational simulation only.</strong> One illustrative 1,000 km transect represents one stratum; it is not a conversion of survey area into distance. Here ε sets the target reconstruction error, and the number of samples is found by simulation to meet it. This 1D example cannot validate the manuscript’s spatial sampling equation or guarantee the target ε in a real survey.</p>
+      </article>
+
+      <details class="card result-card area-question">
+        <summary><h2>How much area?</h2><span class="badge">effort → area</span></summary>
+        <p class="section-copy">Choose a target error and sample budget to calculate the area supported.</p>
+        <div class="question-body"><div class="question-inputs"><h3>Inputs for this question</h3><div class="field slider-field">
+        <div id="areaEpsilonPreview" class="error-preview" hidden role="region" aria-label="Illustrative lognormal concentration distribution">
+          <div class="preview-head"><strong>Concentration prediction spread between the predicted and the true on average across a studied domain</strong><button class="preview-close" type="button" aria-label="Close concentration preview">×</button></div>
+          <svg viewBox="0 0 400 190" role="img" aria-label="Lognormal curve on a fixed concentration axis from 0 to 500 copies per litre"></svg>
+          <div class="preview-values"></div>
+          <p class="sigma-note"></p>
+          <p>Assuming the true concentration was at 100 copies/L.</p>
+        </div>
+        <div class="epsilon-label-row"><label for="areaEpsilon">Target prediction error ε</label><div class="epsilon-value-controls"><output id="areaEpsilonValue" for="areaEpsilon">0.80</output><button class="epsilon-edit" type="button" data-edit-epsilon="areaEpsilon">Edit</button><input id="areaEpsilonEntry" class="epsilon-entry" type="number" min="0.05" max="5" step="0.01" value="0.80" aria-label="Type target prediction error for area calculation" hidden></div></div>
+        <input id="areaEpsilon" type="range" value="0.8" min="0.05" max="5" step="0.01" aria-describedby="areaEpsilonHint" aria-controls="areaEpsilonPreview">
+        <div class="slider-ends"><span>0.05 · lower error</span><span>5.00 · higher error</span></div>
+        <p id="areaEpsilonHint" class="range-note">Log-scale RMSE. Drag or use arrow keys to preview the spread.</p>
+      </div>      <div class="field">
+        <label for="available">Available samples <span>per stratum</span></label>
+        <input id="available" type="number" value="50" min="1" step="1">
+      </div></div><div class="question-output">
+        <div class="number-grid">
+          <div class="number"><strong id="supportedArea">—</strong><span><b class="symbol">A</b>km² per stratum</span></div>
+          <div class="number"><strong id="availableDensity">—</strong><span>required samples / 10,000 km² / stratum</span></div>
+          <div class="number"><strong id="expectedError">—</strong><span>this question’s target prediction error ε</span></div>
+        </div>
+        <p id="areaStatus" class="status">Area is a density-equivalent planning value; it does not locate a boundary of reliable inference.</p>
+        </div></div>
+      </details>
+      <article class="card interpretation">
+        <h2>How to read the result</h2>
+        <p id="interpretation">—</p>
+        <p>If every station supplies every stratum, the required station count equals the samples per stratum. The total shown above counts all site-stratum observations. Filters, PCR replicates, and repeated visits are separate effort types.</p>
+        <p>The equation used is <code>log(ε) = ω + β log(E) + θ log(ρ) + γ log(E) log(ρ)</code>. Its fitted support is ρ = 25–1,000 km and E = 1.5–20 samples per 10,000 km² per stratum. Calculations outside the E range extend the fitted formula and carry an extrapolation warning.</p>
+      </article>
+
+    </section>
+  </main>
+
+  <dialog id="epsilonFigure" aria-labelledby="epsilonFigureTitle">
+    <section class="figure-modal">
+      <div class="figure-modal-head">
+        <div><h2 id="epsilonFigureTitle">Concentration prediction spread between the predicted and the true on average across a studied domain</h2><p class="section-copy">Assuming the true concentration was at 100 copies/L.</p></div>
+        <button id="closeFigure" class="close-modal" type="button" aria-label="Close concentration calculator">×</button>
+      </div>
+      <div class="range-controls">
+        <div class="field"><label for="rangeConcentration">Reference concentration C <span>copies/L</span></label><input id="rangeConcentration" type="number" value="100" min="0.000001" step="10"></div>
+        <div class="field"><label for="rangeEpsilon">Prediction error ε <span>log scale</span></label><input id="rangeEpsilon" type="number" value="0.8" min="0.001" step="0.05"></div>
+      </div>
+      <div class="range-actions"><button id="usePlannerValues" type="button">Use planner ε</button><span class="section-copy">Only concentration and ε determine this range.</span></div>
+      <div class="range-results">
+        <div class="number"><strong id="rangeLower">—</strong><span>lower concentration</span></div>
+        <div class="number"><strong id="rangeCenter">—</strong><span>log-space center; median after back-transformation</span></div>
+        <div class="number"><strong id="rangeUpper">—</strong><span>upper concentration</span></div>
+      </div>
+      <svg id="rangeChart" viewBox="0 0 820 330" role="img" aria-label="Lognormal concentration distribution with the epsilon range highlighted"></svg>
+      <p id="rangeExplanation" class="range-note">—</p>
+      <p class="range-note"><strong>Interpretation.</strong> The bounds are <code>exp(log(C) − ε)</code> and <code>exp(log(C) + ε)</code>, assuming the true concentration was at 100 copies/L. The curve assumes normally distributed error in log space, producing a right-skewed lognormal density in copies/L. The bounds show ±1 ε (about 68% only under that assumption); they are not absolute biological minima and maxima.</p>
+    </section>
+  </dialog>
+
+  <footer>Companion prototype to <strong>04_eDNA_survey_planner.R</strong>. This HTML runs entirely in your browser and does not upload data.</footer>
+
+  <script>
+    "use strict";
+    const ids = ["epsilon", "areaEpsilon", "rho", "area", "strata", "available", "omega", "beta", "theta", "gamma"];
+    const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+    const outputIds = ["requiredDensity", "requiredPerStratum", "requiredTotal", "supportedArea", "availableDensity", "expectedError", "sampleStatus", "areaStatus", "interpretation", "rhoBadge"];
+    const out = Object.fromEntries(outputIds.map(id => [id, document.getElementById(id)]));
+    const defaults = { omega: 1.65, beta: -0.176, theta: -0.228, gamma: -0.0684 };
+    const support = { rhoMin: 25, rhoMax: 1000, densityMin: 1.5, densityMax: 20 };
+
+    function read() {
+      return Object.fromEntries(ids.map(id => [id, Number(el[id].value)]));
+    }
+    function finitePositive(...values) { return values.every(v => Number.isFinite(v) && v > 0); }
+    function parameters(v) {
+      return { a: v.omega + v.theta * Math.log(v.rho), b: v.beta + v.gamma * Math.log(v.rho) };
+    }
+    function errorAt(density, v) {
+      const {a, b} = parameters(v);
+      return Math.exp(a + b * Math.log(density));
+    }
+    function requiredDensity(v) {
+      const {a, b} = parameters(v);
+      if (!Number.isFinite(a) || !Number.isFinite(b) || b >= -1e-8) return {density: NaN, status: "nondecreasing"};
+      const density = Math.exp((Math.log(v.epsilon) - a) / b);
+      const status = density > support.densityMax ? "extrapolated_high" :
+        density < support.densityMin ? "extrapolated_low" : "within";
+      return {density, status};
+    }
+    function fmt(value, digits = 2) {
+      if (!Number.isFinite(value)) return "—";
+      return new Intl.NumberFormat("en-US", {maximumFractionDigits: digits}).format(value);
+    }
+    function setStatus(node, text, warn = false) {
+      node.textContent = text;
+      node.classList.toggle("warn", warn);
+    }
+
+    function updateArea(shared) {
+      const v = {...shared, epsilon: shared.areaEpsilon};
+      const valid = finitePositive(v.epsilon, v.rho, v.available) && Number.isInteger(v.available) &&
+        [v.omega, v.beta, v.theta, v.gamma].every(Number.isFinite);
+      const req = valid ? requiredDensity(v) : {density: NaN};
+      out.supportedArea.textContent = fmt(10000 * v.available / req.density, 0);
+      out.availableDensity.textContent = fmt(req.density);
+      out.expectedError.textContent = valid ? fmt(v.epsilon, 3) : "—";
+      const warning = !valid || !Number.isFinite(req.density) || req.status !== "within" || v.rho < support.rhoMin || v.rho > support.rhoMax;
+      setStatus(out.areaStatus, !valid ? "Enter a positive whole sample budget and valid shared assumptions." :
+        !Number.isFinite(req.density) ? "These coefficients cannot be inverted to calculate area." :
+        `${warning ? "Extrapolation beyond the calibration range. " : "Within the calibrated range. "}Area assumes comparable geometry and spatial process; it does not locate a boundary of reliable inference.`, warning);
+    }
+
+    function updatePreviews() {
+      ["epsilon", "areaEpsilon"].forEach(id => {
+        const epsilon = Number(el[id].value), center = 100;
+        const lower = Math.exp(Math.log(center)-epsilon), upper = Math.exp(Math.log(center)+epsilon);
+        document.getElementById(id + "Value").textContent = epsilon.toFixed(2);
+        const entry = document.getElementById(id + "Entry");
+        if (entry.hidden || document.activeElement !== entry) entry.value = epsilon.toFixed(2);
+        const preview = document.getElementById(id + "Preview");
+        preview.querySelector(".preview-values").textContent = `Lower: ${fmt(lower)} · Median: 100 · Upper: ${fmt(upper)}`;
+        preview.querySelector(".sigma-note").textContent = `Range = exp(log(100) ± ${fmt(epsilon,2)}) · multiplicative factor ÷/× ${fmt(Math.exp(epsilon),2)}.`;
+        const svg = preview.querySelector("svg"), NS = "http://www.w3.org/2000/svg";
+        svg.replaceChildren();
+        const xMax = 500;
+        const x = value => 22 + value/xMax*360;
+        const pdf = value => value > 0 ? Math.exp(-0.5*Math.pow((Math.log(value)-Math.log(center))/epsilon,2))/(value*epsilon*Math.sqrt(2*Math.PI)) : 0;
+        const values = Array.from({length:241},(_,i)=>xMax*Math.pow(i/240,2)).slice(1);
+        values.push(center, center*Math.exp(-epsilon*epsilon));
+        values.sort((a,b)=>a-b);
+        const peak = Math.max(...values.map(pdf));
+        const y = value => 148-115*pdf(value)/peak;
+        const add = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k,v]) => n.setAttribute(k,v)); if(text != null) n.textContent = text; svg.appendChild(n); };
+        const visibleLower=Math.max(0,lower), visibleUpper=Math.min(xMax,upper);
+        if(visibleUpper>visibleLower) add("rect", {x:x(visibleLower),y:25,width:x(visibleUpper)-x(visibleLower),height:123,fill:"#e5f2f1"});
+        const curve=values.map((value,i)=>`${i ? 'L':'M'}${x(value)},${y(value)}`).join(' ');
+        add("path", {d:`M${x(0)},148 ${curve} L${x(xMax)},148 Z`,fill:"rgba(0,109,119,.13)"});
+        add("path", {d:curve,fill:"none",stroke:"#006d77","stroke-width":3});
+        [lower,center,upper].filter(value=>value>=0&&value<=xMax).forEach(value=>add("line",{x1:x(value),x2:x(value),y1:25,y2:148,stroke:"#d45b24","stroke-dasharray":"3 4"}));
+        add("line",{x1:22,x2:382,y1:148,y2:148,stroke:"#587074"});
+        [0,100,200,300,400,500].forEach(value=>add("text",{x:x(value),y:166,"text-anchor":"middle","font-size":12,fill:"#587074"},value));
+        add("text",{x:202,y:185,"text-anchor":"middle","font-size":12,fill:"#587074"},"Concentration (copies/L)");
+      });
+    }
+    ["epsilon", "areaEpsilon"].forEach(id => {
+      const input = el[id], preview = document.getElementById(id + "Preview");
+      let pointerActive = false;
+      let dismissed = false;
+      const show = () => { if (!pointerActive && !dismissed) preview.hidden = false; };
+      input.addEventListener("pointerdown", () => {
+        pointerActive = true;
+        dismissed = false;
+        preview.hidden = false;
+      });
+      const endPointer = () => { pointerActive = false; };
+      document.addEventListener("pointerup", endPointer);
+      document.addEventListener("pointercancel", endPointer);
+      input.addEventListener("focus", show);
+      input.addEventListener("input", show);
+      input.addEventListener("blur", () => { pointerActive = false; preview.hidden = true; });
+      input.addEventListener("keydown", event => { if(event.key === "Escape") preview.hidden = true; });
+      preview.querySelector(".preview-close").addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        dismissed = true;
+        preview.hidden = true;
+        input.blur();
+      });
+
+      const output = document.getElementById(id + "Value");
+      const edit = document.querySelector(`[data-edit-epsilon="${id}"]`);
+      const entry = document.getElementById(id + "Entry");
+      const finishEditing = submit => {
+        if (submit) {
+          if (!entry.checkValidity()) { entry.reportValidity(); return; }
+          input.value = entry.value;
+        }
+        entry.hidden = true;
+        output.hidden = false;
+        edit.hidden = false;
+        if (submit) {
+          dismissed = false;
+          update();
+          preview.hidden = false;
+        }
+      };
+      edit.addEventListener("click", () => {
+        entry.value = Number(input.value).toFixed(2);
+        output.hidden = true;
+        edit.hidden = true;
+        entry.hidden = false;
+        entry.focus();
+        entry.select();
+      });
+      entry.addEventListener("keydown", event => {
+        if (event.key === "Enter") { event.preventDefault(); finishEditing(true); }
+        if (event.key === "Escape") { event.preventDefault(); finishEditing(false); }
+      });
+    });
+
+    function update() {
+      const v = read();
+      updatePreviews();
+      updateArea(v);
+      const valid = finitePositive(v.epsilon, v.rho, v.area, v.strata) &&
+        Number.isInteger(v.strata) &&
+        [v.omega, v.beta, v.theta, v.gamma].every(Number.isFinite);
+      document.querySelectorAll("[data-rho]").forEach(button => button.classList.toggle("active", Number(button.dataset.rho) === v.rho));
+      out.rhoBadge.textContent = Number.isFinite(v.rho) ? `ρ = ${fmt(v.rho, 0)} km` : "ρ invalid";
+      if (!valid) {
+        [out.requiredDensity, out.requiredPerStratum, out.requiredTotal].forEach(n => n.textContent = "—");
+        setStatus(out.sampleStatus, "Use positive numbers and whole numbers for strata and available samples.", true);
+        out.interpretation.textContent = "Correct the highlighted scenario inputs to calculate a plan.";
+        drawChart(v, NaN);
+        scheduleSimulation();
+        return;
+      }
+
+      const req = requiredDensity(v);
+      const rhoSupported = v.rho >= support.rhoMin && v.rho <= support.rhoMax;
+      out.requiredDensity.textContent = fmt(req.density);
+      const count = Number.isFinite(req.density) ? Math.ceil(v.area * req.density / 10000 - 1e-10) : NaN;
+      const realised = Number.isFinite(count) ? 10000 * count / v.area : NaN;
+      out.requiredPerStratum.textContent = Number.isFinite(count) ? fmt(count, 0) : "—";
+      out.requiredTotal.textContent = Number.isFinite(count) ? fmt(count * v.strata, 0) : "—";
+
+      let sampleMessage = "The target falls within the calibrated density range.";
+      let sampleWarn = !rhoSupported;
+      if (!rhoSupported) sampleMessage = `ρ is outside the supported 25–1,000 km range. ${sampleMessage}`;
+      if (req.status === "extrapolated_high") { sampleMessage = `The formula requires E ≈ ${fmt(req.density)}, beyond the fitted maximum of 20. Treat the count as an extrapolation requiring validation.`; sampleWarn = true; }
+      if (req.status === "extrapolated_low") { sampleMessage = `The formula requires E ≈ ${fmt(req.density)}, below the fitted minimum of 1.5. Treat the count as an extrapolation requiring validation.`; sampleWarn = true; }
+      if (req.status === "nondecreasing") { sampleMessage = "These coefficients do not produce a safely decreasing error curve, so the equation cannot be inverted."; sampleWarn = true; }
+      setStatus(out.sampleStatus, sampleMessage, sampleWarn);
+
+      if (Number.isFinite(count)) {
+        out.interpretation.textContent = `For ρ = ${fmt(v.rho, 0)} km and target ε = ${fmt(v.epsilon, 3)}, the central curve requires E ≈ ${fmt(req.density)}. Across ${fmt(v.area, 0)} km², round up to ${fmt(count, 0)} samples in each stratum (${fmt(count * v.strata, 0)} site-stratum observations across ${v.strata} strata).`;
+      } else {
+        out.interpretation.textContent = "This scenario does not yield a supported whole-sample recommendation. Adjust the error target, area, or calibration before using it for planning.";
+      }
+      drawChart(v, req.density);
+      scheduleSimulation();
+    }
+
+    let curveDrag = null;
+    let curveGeometry = null;
+    const effortChart = document.getElementById("chart");
+    effortChart.addEventListener("pointerdown", event => {
+      if (!event.target.closest(".curve-handle") || event.button !== 0 || !curveGeometry) return;
+      event.preventDefault();
+      curveDrag = {...curveGeometry, pointerId: event.pointerId};
+      effortChart.setPointerCapture(event.pointerId);
+    });
+    effortChart.addEventListener("pointermove", event => {
+      if (!curveDrag || event.pointerId !== curveDrag.pointerId) return;
+      const matrix = effortChart.getScreenCTM();
+      if (!matrix) return;
+      const cursor = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+      const {xMin, xMax, yMin, yMax, v} = curveDrag;
+      // Project onto the curve in screen coordinates, so dragging works in either direction.
+      let best = Infinity, target = v.epsilon;
+      for (let i = 0; i <= 1200; i++) {
+        const density = xMin + (xMax - xMin) * i / 1200;
+        const error = errorAt(density, v);
+        if (error < Number(el.epsilon.min) || error > Number(el.epsilon.max)) continue;
+        const px = 66 + (density - xMin) / (xMax - xMin) * 630;
+        const py = 342 - (error - yMin) / (yMax - yMin) * 318;
+        const distance = (cursor.x - px) ** 2 + (cursor.y - py) ** 2;
+        if (distance < best) { best = distance; target = error; }
+      }
+      el.epsilon.value = target.toFixed(2);
+      update();
+    });
+    const endCurveDrag = event => {
+      if (!curveDrag || event.pointerId !== curveDrag.pointerId) return;
+      curveDrag = null;
+      if (effortChart.hasPointerCapture(event.pointerId)) effortChart.releasePointerCapture(event.pointerId);
+      update();
+    };
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach(type => effortChart.addEventListener(type, endCurveDrag));
+
+    function drawChart(v, recommended) {
+      const svg = document.getElementById("chart");
+      const NS = "http://www.w3.org/2000/svg";
+      svg.replaceChildren();
+      if (![v.rho, v.epsilon, v.omega, v.beta, v.theta, v.gamma].every(Number.isFinite) || v.rho <= 0 || v.epsilon <= 0) return;
+      const W = 720, H = 400, m = {l: 66, r: 24, t: 24, b: 58};
+      const currentDensity = NaN; // This curve belongs to the sample-count scenario.
+      const relevant = [support.densityMin, support.densityMax, recommended, currentDensity]
+        .filter(d => Number.isFinite(d) && d > 0);
+      const xMin = curveDrag?.xMin ?? Math.max(0.05, Math.min(...relevant) * 0.8);
+      const xMax = curveDrag?.xMax ?? Math.max(...relevant) * 1.15;
+      const densities = Array.from({length: 160}, (_, i) => xMin + i * (xMax - xMin) / 159);
+      const errors = densities.map(d => errorAt(d, v));
+      if (!errors.every(Number.isFinite)) return;
+      const yMin = curveDrag?.yMin ?? Math.max(0, Math.min(...errors, v.epsilon) * 0.88);
+      const yMax = curveDrag?.yMax ?? Math.max(...errors, v.epsilon) * 1.10;
+      curveGeometry = {xMin, xMax, yMin, yMax, v};
+      const x = d => m.l + (d - xMin) / (xMax - xMin) * (W - m.l - m.r);
+      const y = e => H - m.b - (e - yMin) / (yMax - yMin) * (H - m.t - m.b);
+      const add = (name, attrs, text) => {
+        const node = document.createElementNS(NS, name);
+        Object.entries(attrs || {}).forEach(([k, val]) => node.setAttribute(k, val));
+        if (text != null) node.textContent = text;
+        svg.appendChild(node); return node;
+      };
+      const xTicks = Array.from({length: 6}, (_, i) => xMin + i * (xMax - xMin) / 5);
+      const yTicks = Array.from({length: 5}, (_, i) => yMin + i * (yMax - yMin) / 4);
+      const bandLeft = Math.max(support.densityMin, xMin);
+      const bandRight = Math.min(support.densityMax, xMax);
+      if (bandRight > bandLeft) {
+        add("rect", {x:x(bandLeft), y:m.t, width:x(bandRight)-x(bandLeft), height:H-m.t-m.b, class:"support-band"});
+        add("line", {x1:x(bandLeft), x2:x(bandLeft), y1:m.t, y2:H-m.b, class:"support-edge"});
+        add("line", {x1:x(bandRight), x2:x(bandRight), y1:m.t, y2:H-m.b, class:"support-edge"});
+        add("text", {x:(x(bandLeft)+x(bandRight))/2, y:m.t+16, "text-anchor":"middle", class:"chart-text"}, "fitted density range");
+      }
+      xTicks.forEach(t => { add("line", {x1:x(t), x2:x(t), y1:m.t, y2:H-m.b, class:"grid"}); add("text", {x:x(t), y:H-m.b+22, "text-anchor":"middle", class:"chart-text"}, fmt(t,0)); });
+      yTicks.forEach(t => { add("line", {x1:m.l, x2:W-m.r, y1:y(t), y2:y(t), class:"grid"}); add("text", {x:m.l-10, y:y(t)+4, "text-anchor":"end", class:"chart-text"}, fmt(t,2)); });
+      add("line", {x1:m.l, x2:W-m.r, y1:H-m.b, y2:H-m.b, class:"axis"});
+      add("line", {x1:m.l, x2:m.l, y1:m.t, y2:H-m.b, class:"axis"});
+      add("path", {d: densities.map((d,i) => `${i ? "L" : "M"}${x(d).toFixed(2)},${y(errors[i]).toFixed(2)}`).join(" "), class:"curve"});
+      if (v.epsilon >= yMin && v.epsilon <= yMax) add("line", {x1:m.l, x2:W-m.r, y1:y(v.epsilon), y2:y(v.epsilon), class:"target"});
+      if (Number.isFinite(recommended) && recommended >= xMin && recommended <= xMax) {
+        add("line", {x1:x(recommended), x2:x(recommended), y1:m.t, y2:H-m.b, class:"recommend"});
+        add("circle", {cx:x(recommended), cy:y(errorAt(recommended,v)), r:6, class:"point curve-handle"});
+      }
+      add("text", {x:(m.l+W-m.r)/2, y:H-14, "text-anchor":"middle", class:"chart-title"}, "Samples per 10,000 km² per stratum");
+      const dot = svg.querySelector(".point");
+      if (dot) add("circle", {cx:dot.getAttribute("cx"), cy:dot.getAttribute("cy"), r:18, fill:"transparent", class:"curve-handle"});
+      const ylabel = add("text", {x:17, y:(m.t+H-m.b)/2, "text-anchor":"middle", class:"chart-title", transform:`rotate(-90 17 ${(m.t+H-m.b)/2})`}, "Prediction error ε");
+    }
+
+    ids.forEach(id => el[id].addEventListener("input", update));
+    document.querySelectorAll("[data-rho]").forEach(button => button.addEventListener("click", () => { el.rho.value = button.dataset.rho; update(); }));
+    document.getElementById("reset").addEventListener("click", () => { Object.entries(defaults).forEach(([id, value]) => el[id].value = value); update(); });
+    const epsilonFigure = document.getElementById("epsilonFigure");
+    const range = {
+      concentration: document.getElementById("rangeConcentration"),
+      epsilon: document.getElementById("rangeEpsilon"),
+      lower: document.getElementById("rangeLower"),
+      center: document.getElementById("rangeCenter"),
+      upper: document.getElementById("rangeUpper"),
+      explanation: document.getElementById("rangeExplanation")
+    };
+    function syncRangeFromPlanner() {
+      range.epsilon.value = el.epsilon.value;
+      updateRange();
+    }
+    function updateRange() {
+      const c = Number(range.concentration.value), epsilon = Number(range.epsilon.value);
+      if (!finitePositive(c, epsilon)) {
+        [range.lower, range.center, range.upper].forEach(node => node.textContent = "—");
+        range.explanation.textContent = "Enter positive values for concentration and ε.";
+        drawRangeChart(NaN, NaN);
+        return;
+      }
+      const lower = Math.exp(Math.log(c) - epsilon), upper = Math.exp(Math.log(c) + epsilon);
+      range.lower.textContent = fmt(lower, 2);
+      range.center.textContent = fmt(c, 2);
+      range.upper.textContent = fmt(upper, 2);
+      const arithmeticMean = c * Math.exp(epsilon * epsilon / 2);
+      range.explanation.textContent = `For log-space center C = ${fmt(c, 2)} copies/L and ε = ${fmt(epsilon, 3)}, Figure S3's transformation gives ${fmt(lower, 2)}–${fmt(upper, 2)} copies/L (a multiplicative factor of ÷/× ${fmt(Math.exp(epsilon), 2)}). After back-transformation, C is the median of the illustrated lognormal distribution; its arithmetic mean is ${fmt(arithmeticMean, 2)} copies/L under the normal log-error assumption.`;
+      drawRangeChart(c, epsilon);
+    }
+    function drawRangeChart(c, epsilon) {
+      const svg = document.getElementById("rangeChart"), NS = "http://www.w3.org/2000/svg";
+      svg.replaceChildren();
+      if (!finitePositive(c, epsilon)) return;
+      const W = 820, H = 330, m = {l:70, r:24, t:25, b:62};
+      const xMin = c * Math.exp(-3.5 * epsilon), xMax = c * Math.exp(2.8 * epsilon);
+      const x = value => m.l + (value-xMin)/(xMax-xMin)*(W-m.l-m.r);
+      const logDensity = value => Math.exp(-0.5 * Math.pow((Math.log(value)-Math.log(c))/epsilon,2)) / (value*epsilon*Math.sqrt(2*Math.PI));
+      const concentrations=Array.from({length:241},(_,i)=>xMin+i*(xMax-xMin)/240);
+      const densities=concentrations.map(logDensity), densityMax=Math.max(...densities);
+      const y = d => H-m.b-(d/densityMax)*(H-m.t-m.b)*0.92;
+      const add = (name, attrs, text) => { const node=document.createElementNS(NS,name); Object.entries(attrs||{}).forEach(([k,v])=>node.setAttribute(k,v)); if(text!=null)node.textContent=text; svg.appendChild(node); return node; };
+      const lower=c*Math.exp(-epsilon), upper=c*Math.exp(epsilon);
+      add("rect", {x:x(lower), y:m.t, width:x(upper)-x(lower), height:H-m.t-m.b, class:"support-band"});
+      [lower,c,upper].forEach((value,i) => add("line", {x1:x(value),x2:x(value),y1:m.t,y2:H-m.b,class:i===1?"recommend":"support-edge"}));
+      const curvePath=concentrations.map((value,i)=>`${i?"L":"M"}${x(value).toFixed(2)},${y(densities[i]).toFixed(2)}`).join(" ");
+      add("path", {d:`M${x(xMin).toFixed(2)},${(H-m.b).toFixed(2)} ${curvePath} L${x(xMax).toFixed(2)},${(H-m.b).toFixed(2)} Z`,class:"density-area"});
+      add("path", {d:curvePath,class:"curve"});
+      add("line", {x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,class:"axis"});
+      Array.from({length:6},(_,i)=>xMin+i*(xMax-xMin)/5).forEach(value=>{add("line",{x1:x(value),x2:x(value),y1:H-m.b,y2:H-m.b+6,class:"axis"});add("text",{x:x(value),y:H-m.b+23,"text-anchor":"middle",class:"chart-text"},fmt(value,value<10?2:0));});
+      add("text",{x:(m.l+W-m.r)/2,y:H-13,"text-anchor":"middle",class:"chart-title"},"Concentration (copies/L; linear scale)");
+      add("text",{x:x(c),y:m.t+17,"text-anchor":"middle",class:"chart-title"},`median C = ${fmt(c,2)}`);
+      add("text",{x:(x(lower)+x(upper))/2,y:H-m.b-12,"text-anchor":"middle",class:"chart-text"},"Figure S3 range: exp(log(C) ± ε)");
+    }
+    document.querySelectorAll(".epsilon-help").forEach(button => button.addEventListener("click", () => { syncRangeFromPlanner(); epsilonFigure.showModal(); }));
+    document.getElementById("closeFigure").addEventListener("click", () => epsilonFigure.close());
+    epsilonFigure.addEventListener("click", event => { if (event.target === epsilonFigure) epsilonFigure.close(); });
+    [range.concentration, range.epsilon].forEach(node => node.addEventListener("input", updateRange));
+    document.getElementById("usePlannerValues").addEventListener("click", syncRangeFromPlanner);
+    // Self-contained educational GP; the Pages deployment copies only this HTML.
+    const sim = {fieldSeed: 317, selectSeed: 911, obsSeed: 505, sparse: false, timer: null};
+    // v2 simulation constants (mirrors xx_transect_simulation_v2.R).
+    const SIM = {nField:500, transect:1000, mu:Math.log(100), spatialSd:1.6, sigmaSd:0.3,
+                 nFeat:128, searchReps:6, searchMax:150};
+    function seededRandom(seed) {
+      return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t ^= t + Math.imul(t ^ t >>> 7, 61 | t);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    }
+    function normal(rng) { return Math.sqrt(-2 * Math.log(Math.max(1e-12, rng()))) * Math.cos(2 * Math.PI * rng()); }
+    function cholesky(a) {
+      const n = a.length, l = Array.from({length:n}, () => new Float64Array(n));
+      for (let i=0;i<n;i++) for (let j=0;j<=i;j++) {
+        let z=a[i][j]; for (let k=0;k<j;k++) z-=l[i][k]*l[j][k];
+        if (i===j && z<=0) throw new Error('Covariance could not be factored.');
+        l[i][j]=i===j?Math.sqrt(z):z/l[j][j];
+      }
+      return l;
+    }
+    function forward(l, b) {
+      const z = new Float64Array(b.length);
+      for(let i=0;i<b.length;i++) { let v=b[i]; for(let j=0;j<i;j++) v-=l[i][j]*z[j]; z[i]=v/l[i][i]; }
+      return z;
+    }
+    function posteriorWeights(l, b) {
+      const z=forward(l,b), a=new Float64Array(b.length);
+      for(let i=b.length-1;i>=0;i--) { let v=z[i]; for(let j=i+1;j<b.length;j++) v-=l[j][i]*a[j]; a[i]=v/l[i][i]; }
+      return a;
+    }
+    // ---- v2 machinery: true field, nugget observations, kriging, find-N ------
+    function shuffledIndices(N, seed){
+      const rng=seededRandom(seed), a=Array.from({length:N},(_,i)=>i);
+      for(let i=N-1;i>0;i--){const j=Math.floor(rng()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}
+      return a;
+    }
+    function pickSubset(N, n, seed){ return shuffledIndices(N,seed).slice(0,n).sort((p,q)=>p-q); }
+    // Draw a true latent field at nField random locations; observe every one with nugget noise.
+    function buildField(rho, fieldSeed, obsSeed){
+      const frng=seededRandom(fieldSeed);
+      const feats=Array.from({length:SIM.nFeat},()=>({w:normal(frng)/rho,a:normal(frng),b:normal(frng)}));
+      const latent=x=>SIM.mu+SIM.spatialSd*feats.reduce((s,f)=>s+f.a*Math.cos(f.w*x)+f.b*Math.sin(f.w*x),0)/Math.sqrt(SIM.nFeat);
+      const lrng=seededRandom(fieldSeed+12345);
+      const x=Array.from({length:SIM.nField},()=>SIM.transect*lrng()).sort((p,q)=>p-q);
+      const trueLog=x.map(latent);
+      const orng=seededRandom(obsSeed);
+      const obsLog=trueLog.map(t=>t+SIM.sigmaSd*normal(orng));
+      return {x,trueLog,obsLog,latent};
+    }
+    const kern=(a,b,rho)=>SIM.spatialSd*SIM.spatialSd*Math.exp(-0.5*((a-b)/rho)**2);
+    // GP regression (kriging) from the observations at idx, predicted at gridX.
+    function reconstruct(field, idx, rho, gridX){
+      const sx=idx.map(i=>field.x[i]), sy=idx.map(i=>field.obsLog[i]-SIM.mu);
+      const k=sx.map((xi,i)=>Float64Array.from(sx,(xj,j)=>kern(xi,xj,rho)+(i===j?SIM.sigmaSd*SIM.sigmaSd+1e-9:0)));
+      const l=cholesky(k), w=posteriorWeights(l,sy);
+      return gridX.map(gx=>{let m=SIM.mu; for(let j=0;j<sx.length;j++) m+=kern(gx,sx[j],rho)*w[j]; return m;});
+    }
+    // RMSE between the reconstruction (from idx) and the truth across ALL locations.
+    function subsetRmse(field, idx, rho){
+      const pred=reconstruct(field, idx, rho, field.x);
+      let s=0; for(let i=0;i<field.x.length;i++){const e=pred[i]-field.trueLog[i]; s+=e*e;}
+      return Math.sqrt(s/field.x.length);
+    }
+    // Mean RMSE over several random thinnings to n samples.
+    function meanRmseForN(field, n, rho, reps, seed){
+      let tot=0; for(let r=0;r<reps;r++) tot+=subsetRmse(field, pickSubset(field.x.length,n,seed+r*7919), rho);
+      return tot/reps;
+    }
+    // Smallest number of samples whose mean RMSE reaches the target epsilon.
+    function findNForEpsilon(field, rho, target){
+      const maxN=Math.min(SIM.searchMax, field.x.length), cands=[];
+      // Dense integer steps where most targets land, coarser beyond.
+      for(let nn=2; nn<=Math.min(40,maxN); nn++) cands.push(nn);
+      for(let nn=48; nn<=maxN; nn+=Math.max(6,Math.round(nn*0.15))) cands.push(nn);
+      if(cands[cands.length-1]!==maxN) cands.push(maxN);
+      const curve=[]; let chosen=null;
+      for(const n of cands){const rm=meanRmseForN(field,n,rho,SIM.searchReps,sim.selectSeed); curve.push({n,rmse:rm}); if(chosen===null&&rm<=target)chosen=n;}
+      return {n:chosen, curve, floor:curve[curve.length-1].rmse, worst:curve[0].rmse};
+    }
+    function scheduleSimulation() {
+      clearTimeout(sim.timer);
+      sim.timer=setTimeout(updateSimulation,100);
+    }
+    function updateSimulation() {
+      const v=read();
+      const status=document.getElementById('simStatus'), result=document.getElementById('simResult');
+      ['truthChart','reconstructionChart'].forEach(id=>document.getElementById(id).replaceChildren());
+      result.textContent='';
+      if(!finitePositive(v.epsilon,v.rho) || v.rho<1 || v.rho>10000) {
+        setStatus(status,'Enter a valid ε and ρ. This illustration supports ρ from 1 to 10,000 km.',true); return;
+      }
+      try {
+        const field=buildField(v.rho, sim.fieldSeed, sim.obsSeed);
+        const res=findNForEpsilon(field, v.rho, v.epsilon);
+        const searchMax=Math.min(SIM.searchMax, field.x.length);
+        const reachable=res.n!==null, baseN=reachable?res.n:searchMax;
+        const n=sim.sparse?Math.max(1,Math.ceil(baseN/4)):baseN;
+        // Show a REPRESENTATIVE thinning: among a few random draws, the one whose
+        // RMSE is closest to their mean, so the picture matches the target.
+        const draws=Array.from({length:8},(_,r)=>{const id=pickSubset(field.x.length,n,sim.selectSeed+r*1013); return {id,rmse:subsetRmse(field,id,v.rho)};});
+        const meanDraw=draws.reduce((a,d)=>a+d.rmse,0)/draws.length;
+        draws.sort((a,b)=>Math.abs(a.rmse-meanDraw)-Math.abs(b.rmse-meanDraw));
+        const idx=draws[0].id, realized=draws[0].rmse;
+        const gridX=Array.from({length:401},(_,i)=>i*SIM.transect/400);
+        const predFine=reconstruct(field, idx, v.rho, gridX), truthFine=gridX.map(field.latent);
+        const points=gridX.map((gx,i)=>({x:gx, truth:Math.exp(truthFine[i]), median:Math.exp(predFine[i])}));
+        const allObs=field.x.map((xx,i)=>({x:xx, val:Math.exp(field.obsLog[i])}));   // every observation
+        const samples=idx.map(i=>({x:field.x[i], val:Math.exp(field.obsLog[i])}));    // the ones used to reconstruct
+        const vals=[]; points.forEach(p=>vals.push(p.truth,p.median)); allObs.forEach(o=>vals.push(o.val));
+        const yMin=Math.min(...vals)*0.8, yMax=Math.max(...vals)*1.2;
+        // Panel 1: true field + ALL observations (orange). Panel 2: true + predicted (red dotted) + samples (green).
+        drawSimulation('truthChart', points, allObs, '#e8871a', yMin, yMax, false);
+        drawSimulation('reconstructionChart', points, samples, '#8bc34a', yMin, yMax, true);
+        const note=reachable?'':` (ε is below the floor this field can reach, ≈ ${fmt(res.floor,2)}; showing the densest plan.)`;
+        setStatus(status,`ρ = ${fmt(v.rho)} km · target ε = ${fmt(v.epsilon,2)} · realised RMSE ≈ ${fmt(realized,2)}.${note}`, !reachable);
+        result.textContent=`The black line is the true concentration; the red dotted line is the prediction reconstructed from the green samples. With this effort the reconstruction's RMSE against the truth is ≈ ${fmt(realized,2)} (target ε = ${fmt(v.epsilon,2)})${sim.sparse?', using the ¼-effort comparison':''}. Hover the curves for local values.`;
+      } catch(error) {setStatus(status,'This scenario could not be simulated. Adjust ρ or generate a new field.',true);}
+    }
+    // points: [{x, truth, median}]; dots: [{x, val}]. showPred adds the red dotted
+    // prediction line. No ribbon. Panel 1 draws dots behind the true line; panel 2
+    // draws the sample dots on top of the lines.
+    function drawSimulation(id, points, dots, dotColor, yMin, yMax, showPred) {
+      const svg=document.getElementById(id), NS='http://www.w3.org/2000/svg', W=720,H=280,m={l:76,r:18,t:15,b:48};
+      const x=v=>m.l+v/1000*(W-m.l-m.r), y=v=>H-m.b-(Math.log(v)-Math.log(yMin))/(Math.log(yMax)-Math.log(yMin))*(H-m.t-m.b);
+      const add=(tag,attrs,text)=>{const n=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));if(text!=null)n.textContent=text;svg.appendChild(n);return n;};
+      const title=(node,text)=>{const n=document.createElementNS(NS,'title');n.textContent=text;node.appendChild(n);};
+      for(let i=0;i<=4;i++) {const val=Math.exp(Math.log(yMin)+(Math.log(yMax)-Math.log(yMin))*i/4);add('line',{x1:m.l,x2:W-m.r,y1:y(val),y2:y(val),class:'grid'});add('text',{x:m.l-8,y:y(val)+4,'text-anchor':'end',class:'chart-text'},val<0.1?val.toExponential(1):fmt(val,val<10?2:0));}
+      for(let i=0;i<=5;i++) add('text',{x:x(i*200),y:H-m.b+22,'text-anchor':'middle',class:'chart-text'},i*200);
+      const line=key=>points.map((p,i)=>`${i?'L':'M'}${x(p.x)},${y(p[key])}`).join(' ');
+      const many=dots.length>60, rDot=many?2.2:3.6, strokeW=many?0:1;
+      const drawDots=()=>dots.forEach(p=>title(add('circle',{cx:x(p.x),cy:y(p.val),r:rDot,fill:dotColor,stroke:'#365b26','stroke-width':strokeW}),`${fmt(p.x)} km: observed ${fmt(p.val)} copies/L`));
+      const drawTruth=()=>add('path',{d:line('truth'),fill:'none',stroke:'#102a2e','stroke-width':2});
+      if(showPred){
+        drawTruth();
+        add('path',{d:line('median'),fill:'none',stroke:'#d62839','stroke-width':2.4,'stroke-dasharray':'2 5','stroke-linecap':'round'});
+        points.forEach(p=>title(add('circle',{cx:x(p.x),cy:y(p.median),r:5,fill:'transparent'}),`${fmt(p.x)} km: predicted ${fmt(p.median)}, true ${fmt(p.truth)} copies/L`));
+        drawDots();
+      } else {
+        drawDots();
+        drawTruth();
+      }
+      add('line',{x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,class:'axis'});
+      add('text',{x:(m.l+W-m.r)/2,y:H-7,'text-anchor':'middle',class:'chart-title'},'Distance along illustrative transect (km)');
+      add('text',{x:17,y:124,transform:'rotate(-90 17 124)','text-anchor':'middle',class:'chart-title'},'Concentration (copies/L)');
+    }
+    document.getElementById('newField').addEventListener('click',()=>{sim.fieldSeed++;sim.obsSeed++;scheduleSimulation();});
+    document.getElementById('newSamples').addEventListener('click',()=>{sim.selectSeed++;scheduleSimulation();});
+    document.getElementById('lessSamples').addEventListener('click',event=>{sim.sparse=!sim.sparse;event.currentTarget.setAttribute('aria-pressed',String(sim.sparse));event.currentTarget.textContent=sim.sparse?'Return to planned sample count':'Compare with ¼ of the samples';scheduleSimulation();});
+
+    updateRange();
+    update();
+  </script>
+</body>
+</html>

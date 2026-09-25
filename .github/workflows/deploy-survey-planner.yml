@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - Code/eDNA_survey_planner.html
+      - Code/eDNA_survey_planner_v2.html
       - .github/workflows/deploy-survey-planner.yml
   workflow_dispatch:
 
@@ -33,7 +33,7 @@ jobs:
       - name: Prepare standalone site
         run: |
           mkdir _site
-          cp Code/eDNA_survey_planner.html _site/index.html
+          cp Code/eDNA_survey_planner_v2.html _site/index.html
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
