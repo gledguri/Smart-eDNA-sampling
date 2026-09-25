@@ -172,10 +172,10 @@
         <div class="question-body"><div class="question-inputs"><h3>Inputs for this question</h3><div class="field slider-field">
         <div id="epsilonPreview" class="error-preview" hidden role="region" aria-label="Illustrative lognormal concentration distribution">
           <strong>Concentration spread · log-space center 100</strong>
-          <svg viewBox="0 0 400 190" role="img" aria-label="Lognormal curve on the concentration scale"></svg>
+          <svg viewBox="0 0 400 190" role="img" aria-label="Lognormal curve on a fixed concentration axis from 0 to 500 copies per litre"></svg>
           <div class="preview-values"></div>
           <p class="sigma-note"></p>
-          <p>Figure S3 transformation: calculate ±ε in log copies/L, then exponentiate. The displayed bounds are multiplicative and always positive.</p>
+          <p>Figure S3 transformation: calculate ±ε in log copies/L, then exponentiate. The x-axis stays fixed at 0–500 copies/L; bounds outside that window remain in the values above.</p>
         </div>
         <label for="epsilon">Target prediction error ε <output id="epsilonValue" for="epsilon">0.80</output></label>
         <input id="epsilon" type="range" value="0.8" min="0.05" max="5" step="0.01" aria-describedby="epsilonHint" aria-controls="epsilonPreview">
@@ -202,10 +202,10 @@
         <div class="question-body"><div class="question-inputs"><h3>Inputs for this question</h3><div class="field slider-field">
         <div id="areaEpsilonPreview" class="error-preview" hidden role="region" aria-label="Illustrative lognormal concentration distribution">
           <strong>Concentration spread · log-space center 100</strong>
-          <svg viewBox="0 0 400 190" role="img" aria-label="Lognormal curve on the concentration scale"></svg>
+          <svg viewBox="0 0 400 190" role="img" aria-label="Lognormal curve on a fixed concentration axis from 0 to 500 copies per litre"></svg>
           <div class="preview-values"></div>
           <p class="sigma-note"></p>
-          <p>Figure S3 transformation: calculate ±ε in log copies/L, then exponentiate. The displayed bounds are multiplicative and always positive.</p>
+          <p>Figure S3 transformation: calculate ±ε in log copies/L, then exponentiate. The x-axis stays fixed at 0–500 copies/L; bounds outside that window remain in the values above.</p>
         </div>
         <label for="areaEpsilon">Target prediction error ε <output id="areaEpsilonValue" for="areaEpsilon">0.80</output></label>
         <input id="areaEpsilon" type="range" value="0.8" min="0.05" max="5" step="0.01" aria-describedby="areaEpsilonHint" aria-controls="areaEpsilonPreview">
@@ -349,22 +349,23 @@
         preview.querySelector(".sigma-note").textContent = `Range = exp(log(100) ± ${fmt(epsilon,2)}) · multiplicative factor ÷/× ${fmt(Math.exp(epsilon),2)}.`;
         const svg = preview.querySelector("svg"), NS = "http://www.w3.org/2000/svg";
         svg.replaceChildren();
-        const xMax = upper * 1.8;
+        const xMax = 500;
         const x = value => 22 + value/xMax*360;
         const pdf = value => value > 0 ? Math.exp(-0.5*Math.pow((Math.log(value)-Math.log(center))/epsilon,2))/(value*epsilon*Math.sqrt(2*Math.PI)) : 0;
         const values = Array.from({length:241},(_,i)=>xMax*Math.pow(i/240,2)).slice(1);
-        values.push(lower, center, upper, center*Math.exp(-epsilon*epsilon));
+        values.push(center, center*Math.exp(-epsilon*epsilon));
         values.sort((a,b)=>a-b);
         const peak = Math.max(...values.map(pdf));
         const y = value => 148-115*pdf(value)/peak;
         const add = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k,v]) => n.setAttribute(k,v)); if(text != null) n.textContent = text; svg.appendChild(n); };
-        add("rect", {x:x(lower),y:25,width:x(upper)-x(lower),height:123,fill:"#e5f2f1"});
+        const visibleLower=Math.max(0,lower), visibleUpper=Math.min(xMax,upper);
+        if(visibleUpper>visibleLower) add("rect", {x:x(visibleLower),y:25,width:x(visibleUpper)-x(visibleLower),height:123,fill:"#e5f2f1"});
         const curve=values.map((value,i)=>`${i ? 'L':'M'}${x(value)},${y(value)}`).join(' ');
         add("path", {d:`M${x(0)},148 ${curve} L${x(xMax)},148 Z`,fill:"rgba(0,109,119,.13)"});
         add("path", {d:curve,fill:"none",stroke:"#006d77","stroke-width":3});
-        [lower,center,upper].forEach(value=>add("line",{x1:x(value),x2:x(value),y1:25,y2:148,stroke:"#d45b24","stroke-dasharray":"3 4"}));
+        [lower,center,upper].filter(value=>value>=0&&value<=xMax).forEach(value=>add("line",{x1:x(value),x2:x(value),y1:25,y2:148,stroke:"#d45b24","stroke-dasharray":"3 4"}));
         add("line",{x1:22,x2:382,y1:148,y2:148,stroke:"#587074"});
-        Array.from({length:5},(_,i)=>i*xMax/4).forEach(value=>add("text",{x:x(value),y:166,"text-anchor":"middle","font-size":12,fill:"#587074"},fmt(value,value<10?1:0)));
+        [0,100,200,300,400,500].forEach(value=>add("text",{x:x(value),y:166,"text-anchor":"middle","font-size":12,fill:"#587074"},value));
         add("text",{x:202,y:185,"text-anchor":"middle","font-size":12,fill:"#587074"},"Concentration (copies/L)");
       });
     }
