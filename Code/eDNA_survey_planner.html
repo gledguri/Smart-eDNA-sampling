@@ -122,9 +122,17 @@
     .slider-ends { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); }
     .error-preview { position: absolute; bottom: calc(100% + 8px); left: 0; width: min(420px, calc(100vw - 86px)); padding: 14px; background: white; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 35px #102a2e30; z-index: 10; }
     .error-preview[hidden] { display: none; }
+    .preview-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+    .preview-close { flex: none; display: inline-grid; place-items: center; width: 25px; height: 25px; padding: 0; font-size: 1rem; }
     .error-preview svg { width: 100%; display: block; }
     .error-preview p { font-size: .75rem; margin: 6px 0; color: var(--muted); }
     .preview-values { display: flex; justify-content: space-between; gap: 8px; font-size: .8rem; font-variant-numeric: tabular-nums; }
+    .epsilon-label-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .epsilon-label-row label { margin: 0; }
+    .epsilon-value-controls { display: flex; align-items: center; gap: 6px; }
+    .epsilon-value-controls output { min-width: 3rem; text-align: right; font-weight: 750; font-variant-numeric: tabular-nums; }
+    .epsilon-edit { padding: 5px 9px; }
+    input.epsilon-entry { width: 92px; padding: 6px 8px; }
     .question-output .number-grid { margin-top: 0; }
     @media (max-width: 900px) { .question-body { grid-template-columns: 1fr; } }
   </style>
@@ -171,13 +179,13 @@
         <div class="result-head"><div><h2>How many samples?</h2><p class="section-copy">Choose a target error and survey area to calculate the samples needed.</p></div><span class="badge">ε → effort</span></div>
         <div class="question-body"><div class="question-inputs"><h3>Inputs for this question</h3><div class="field slider-field">
         <div id="epsilonPreview" class="error-preview" hidden role="region" aria-label="Illustrative lognormal concentration distribution">
-          <strong>Concentration spread · log-space center 100</strong>
+          <div class="preview-head"><strong>Concentration spread · log-space center 100</strong><button class="preview-close" type="button" aria-label="Close concentration preview">×</button></div>
           <svg viewBox="0 0 400 190" role="img" aria-label="Lognormal curve on a fixed concentration axis from 0 to 500 copies per litre"></svg>
           <div class="preview-values"></div>
           <p class="sigma-note"></p>
           <p>Figure S3 transformation: calculate ±ε in log copies/L, then exponentiate. The x-axis stays fixed at 0–500 copies/L; bounds outside that window remain in the values above.</p>
         </div>
-        <label for="epsilon">Target prediction error ε <output id="epsilonValue" for="epsilon">0.80</output></label>
+        <div class="epsilon-label-row"><label for="epsilon">Target prediction error ε</label><div class="epsilon-value-controls"><output id="epsilonValue" for="epsilon">0.80</output><button class="epsilon-edit" type="button" data-edit-epsilon="epsilon">Edit</button><input id="epsilonEntry" class="epsilon-entry" type="number" min="0.05" max="5" step="0.01" value="0.80" aria-label="Type target prediction error for samples calculation" hidden></div></div>
         <input id="epsilon" type="range" value="0.8" min="0.05" max="5" step="0.01" aria-describedby="epsilonHint" aria-controls="epsilonPreview">
         <div class="slider-ends"><span>0.05 · lower error</span><span>5.00 · higher error</span></div>
         <p id="epsilonHint" class="range-note">Log-scale RMSE. Drag or use arrow keys to preview the spread.</p>
@@ -201,13 +209,13 @@
         <div class="result-head"><div><h2>How much area?</h2><p class="section-copy">Choose a target error and sample budget to calculate the area supported.</p></div><span class="badge">effort → area</span></div>
         <div class="question-body"><div class="question-inputs"><h3>Inputs for this question</h3><div class="field slider-field">
         <div id="areaEpsilonPreview" class="error-preview" hidden role="region" aria-label="Illustrative lognormal concentration distribution">
-          <strong>Concentration spread · log-space center 100</strong>
+          <div class="preview-head"><strong>Concentration spread · log-space center 100</strong><button class="preview-close" type="button" aria-label="Close concentration preview">×</button></div>
           <svg viewBox="0 0 400 190" role="img" aria-label="Lognormal curve on a fixed concentration axis from 0 to 500 copies per litre"></svg>
           <div class="preview-values"></div>
           <p class="sigma-note"></p>
           <p>Figure S3 transformation: calculate ±ε in log copies/L, then exponentiate. The x-axis stays fixed at 0–500 copies/L; bounds outside that window remain in the values above.</p>
         </div>
-        <label for="areaEpsilon">Target prediction error ε <output id="areaEpsilonValue" for="areaEpsilon">0.80</output></label>
+        <div class="epsilon-label-row"><label for="areaEpsilon">Target prediction error ε</label><div class="epsilon-value-controls"><output id="areaEpsilonValue" for="areaEpsilon">0.80</output><button class="epsilon-edit" type="button" data-edit-epsilon="areaEpsilon">Edit</button><input id="areaEpsilonEntry" class="epsilon-entry" type="number" min="0.05" max="5" step="0.01" value="0.80" aria-label="Type target prediction error for area calculation" hidden></div></div>
         <input id="areaEpsilon" type="range" value="0.8" min="0.05" max="5" step="0.01" aria-describedby="areaEpsilonHint" aria-controls="areaEpsilonPreview">
         <div class="slider-ends"><span>0.05 · lower error</span><span>5.00 · higher error</span></div>
         <p id="areaEpsilonHint" class="range-note">Log-scale RMSE. Drag or use arrow keys to preview the spread.</p>
@@ -344,6 +352,8 @@
         const epsilon = Number(el[id].value), center = 100;
         const lower = Math.exp(Math.log(center)-epsilon), upper = Math.exp(Math.log(center)+epsilon);
         document.getElementById(id + "Value").textContent = epsilon.toFixed(2);
+        const entry = document.getElementById(id + "Entry");
+        if (entry.hidden || document.activeElement !== entry) entry.value = epsilon.toFixed(2);
         const preview = document.getElementById(id + "Preview");
         preview.querySelector(".preview-values").textContent = `Lower: ${fmt(lower)} · Median: 100 · Upper: ${fmt(upper)}`;
         preview.querySelector(".sigma-note").textContent = `Range = exp(log(100) ± ${fmt(epsilon,2)}) · multiplicative factor ÷/× ${fmt(Math.exp(epsilon),2)}.`;
@@ -372,10 +382,12 @@
     ["epsilon", "areaEpsilon"].forEach(id => {
       const input = el[id], preview = document.getElementById(id + "Preview");
       let pointerActive = false;
-      const show = () => { if (!pointerActive) preview.hidden = false; };
+      let dismissed = false;
+      const show = () => { if (!pointerActive && !dismissed) preview.hidden = false; };
       input.addEventListener("pointerdown", () => {
         pointerActive = true;
-        preview.hidden = !preview.hidden;
+        dismissed = false;
+        preview.hidden = false;
       });
       const endPointer = () => { pointerActive = false; };
       document.addEventListener("pointerup", endPointer);
@@ -384,6 +396,43 @@
       input.addEventListener("input", show);
       input.addEventListener("blur", () => { pointerActive = false; preview.hidden = true; });
       input.addEventListener("keydown", event => { if(event.key === "Escape") preview.hidden = true; });
+      preview.querySelector(".preview-close").addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        dismissed = true;
+        preview.hidden = true;
+        input.blur();
+      });
+
+      const output = document.getElementById(id + "Value");
+      const edit = document.querySelector(`[data-edit-epsilon="${id}"]`);
+      const entry = document.getElementById(id + "Entry");
+      const finishEditing = submit => {
+        if (submit) {
+          if (!entry.checkValidity()) { entry.reportValidity(); return; }
+          input.value = entry.value;
+        }
+        entry.hidden = true;
+        output.hidden = false;
+        edit.hidden = false;
+        if (submit) {
+          dismissed = false;
+          update();
+          preview.hidden = false;
+        }
+      };
+      edit.addEventListener("click", () => {
+        entry.value = Number(input.value).toFixed(2);
+        output.hidden = true;
+        edit.hidden = true;
+        entry.hidden = false;
+        entry.focus();
+        entry.select();
+      });
+      entry.addEventListener("keydown", event => {
+        if (event.key === "Enter") { event.preventDefault(); finishEditing(true); }
+        if (event.key === "Escape") { event.preventDefault(); finishEditing(false); }
+      });
     });
 
     function update() {
