@@ -344,7 +344,7 @@ input[readonly] { background: #edf3f1; }
           <p>At each dense location, <code>rᵢ = inferred_surfaceᵢ − reference_surfaceᵢ</code>; the ε surface and histogram contain <code>√(rᵢ²)</code>. This is mathematically equal to <code>|rᵢ|</code>. Overall <code>ε = √(Σ rᵢ² / M)</code>. The CSV includes all simulated observations and dense comparisons. <code>used_for_inference</code> is <code>true</code> for the survey samples shown in Figure 2 and <code>false</code> otherwise. Only rows with <code>used_to_estimate_epsilon = true</code> contribute to measured ε and the histogram.</p>
           <p>This evaluates recovery of a full-data reference map, not latent-truth accuracy or independent held-out observations. The σ noise is in the simulated observations; both GP surfaces smooth that noise. Consequently these surface ε values differ from the point-to-noisy-observation ε values and have no automatic σ-sized floor. The measured result is never forced to match ε.</p>
           <p>The manuscript equation depends on ρ and ε, not μ, α or σ. Changing GP variance assumptions therefore changes measured ε without recalibrating the recommendation. Each concentration map uses its own surface minimum and maximum in ln(copies/L), so equal colors across the two maps need not mean equal concentrations. Click a white-outlined point to see observed concentration in copies/L and the fitted values. Click anywhere on a surface to inspect the nearest evaluation point. Colored surface cells show direct GP evaluations, clipped to the domain; the ε surface uses every dense pointwise comparison.</p>
-          <p>Area and coordinates use a local spherical Lambert azimuthal equal-area projection (Earth radius 6,371.0088 km). Polygon area approximates the geographic boundary using its projected vertices; regional GP distances are planar km. Domains must span at most 2,000 km and stay between 80°S and 80°N. Up to 2,000 field points (500,000 km²) are supported for exact browser computation. Larger domains are rejected rather than reducing the fixed field density.</p>
+          <p>Area and coordinates use a local spherical Lambert azimuthal equal-area projection (Earth radius 6,371.0088 km). Polygon area approximates the geographic boundary using its projected vertices; regional GP distances are planar km. Domains must span at most 2,000 km and stay between 80°S and 80°N. Up to 4,000 field points (1,000,000 km²) are supported for exact browser computation, and domains under 1,000 km² are rejected. Larger domains are rejected rather than reducing the fixed field density.</p>
           <p>Implementation references: <a href="https://leafletjs.com/reference.html">Leaflet map API</a>, <a href="https://mc-stan.org/docs/functions-reference/matrix_operations.html">Stan covariance functions</a>, <a href="01_GP_sim.R">R simulation</a>, and <a href="04_eDNA_survey_planner.R">R planning equations</a>.</p>
         </details>
       </article>
@@ -796,7 +796,7 @@ input[readonly] { background: #edf3f1; }
    Exact squared-exponential GP, using the R simulator amplitude convention (α is variance). */
 function createSpatialEngineV3() {
   'use strict';
-  const R = 6371.0088, RAD = Math.PI / 180, MAX_POINTS = 2000;
+  const R = 6371.0088, RAD = Math.PI / 180, MAX_POINTS = 4000;
   function nextSeed(previous,entropy) {const seed=entropy>>>0;return seed===previous?(seed+1)>>>0:seed;}
   function random(seed) {
     return () => {
@@ -845,7 +845,7 @@ function createSpatialEngineV3() {
       }
     }
     const area = Math.abs(polygon.reduce((s,a,i)=>{const b=polygon[(i+1)%polygon.length]; return s+a[0]*b[1]-b[0]*a[1];},0))/2;
-    if (area < 0.01) throw Error('The domain has negligible area. Draw a larger polygon.');
+    if (area < 1000) throw Error(`This domain covers only ${Math.round(area).toLocaleString()} km². Draw a domain of at least 1,000 km².`);
     const n = Math.max(1,Math.ceil(area*40/10000));
     const bounds = [Math.min(...polygon.map(p=>p[0])),Math.max(...polygon.map(p=>p[0])),Math.min(...polygon.map(p=>p[1])),Math.max(...polygon.map(p=>p[1]))];
     return {geo,center,polygon,area,n,bounds};
@@ -895,7 +895,7 @@ function createSpatialEngineV3() {
       if(net<=0)throw Error('Island exclusions exceed the polygon area.');
       area+=net;
     }
-    if(area<0.01)throw Error('The domain has negligible area.');
+    if(area<1000)throw Error(`This domain covers only ${Math.round(area).toLocaleString()} km². Draw a domain of at least 1,000 km².`);
     return {geometry,geo:rings[0][0],center,polygons,polygon:polygons[0][0],bounds,area,n:Math.max(1,Math.ceil(area/250))};
   }
   function contains(d,p) {
@@ -903,7 +903,7 @@ function createSpatialEngineV3() {
     return d.polygons.some(part=>inside(p,part[0])&&!part.slice(1).some(hole=>inside(p,hole)));
   }
   function locations(d, seed) {
-    if (d.n>MAX_POINTS) throw Error(`This domain needs ${d.n.toLocaleString()} field points at 40 / 10,000 km². The exact GP supports ${MAX_POINTS}; draw a domain ≤ 500,000 km².`);
+    if (d.n>MAX_POINTS) throw Error(`This domain needs ${d.n.toLocaleString()} field points at 40 / 10,000 km². The exact GP supports ${MAX_POINTS}; draw a domain ≤ 1,000,000 km².`);
     const rng=random(seed), points=[], [xmin,xmax,ymin,ymax]=d.bounds;
     for(let attempts=0;points.length<d.n && attempts<2000000;attempts++) {
       const p=[xmin+rng()*(xmax-xmin),ymin+rng()*(ymax-ymin)];
@@ -1083,7 +1083,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = PACIFIC_WA
       state.outline=L.polygon(boundary,{color:'#006d77',weight:2,fillOpacity:.17,fillRule:'evenodd',interactive:false}).addTo(state.map);
       state.map.fitBounds(state.outline.getBounds(),{padding:[35,35],maxZoom:9});
     }
-    status('domainStatus',`${fmt(d.area)} km²${vertices===pacificStudyDomain?' of water · Pacific example, land excluded':''} · ${fmt(d.n,0)} field points = ceil(area × 40 / 10,000) · one depth layer.${d.n>E.MAX_POINTS?' This exceeds the 2,000-point limit; reduce the domain before simulating.':''}`,d.n>E.MAX_POINTS);
+    status('domainStatus',`${fmt(d.area)} km²${vertices===pacificStudyDomain?' of water · Pacific example, land excluded':''} · ${fmt(d.n,0)} field points = ceil(area × 40 / 10,000) · one depth layer.${d.n>E.MAX_POINTS?' This exceeds the 1,000,000 km² limit; reduce the domain before simulating.':''}`,d.n>E.MAX_POINTS);
     $('area').dispatchEvent(new Event('input',{bubbles:true}));
     planned();$('newSamples').disabled=true;
   }
@@ -1129,7 +1129,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = PACIFIC_WA
       E.validate(p);
       const plan=E.recommend(p,state.domain.area), key=fieldKey(p), cached=state.cache?.key===key?state.cache.field:null;
       const cachedDense=cached?state.cache.dense:null;
-      if(state.domain.n>E.MAX_POINTS)throw Error(`This domain requires ${fmt(state.domain.n,0)} points. Draw a domain ≤ 500,000 km² for the exact GP; density stays fixed at 40 / 10,000 km².`);
+      if(state.domain.n>E.MAX_POINTS)throw Error(`This domain requires ${fmt(state.domain.n,0)} points. Draw a domain ≤ 1,000,000 km² for the exact GP; density stays fixed at 40 / 10,000 km².`);
       $('runSpatial').disabled=true;$('newSamples').disabled=true;$('cancelSpatial').disabled=false;
       status('simStatus',cached?'Inferring the GP surface on the dense comparison grid…':`Simulating ${fmt(state.domain.n,0)} reference observations with the exact GP…`);
       const source=`const engine=(${createSpatialEngineV3.toString()})(); onmessage=event=>{try {
