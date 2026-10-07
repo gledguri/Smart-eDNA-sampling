@@ -728,7 +728,10 @@ input[readonly] { background: #edf3f1; }
       const ylabel = add("text", {x:17, y:(m.t+H-m.b)/2, "text-anchor":"middle", class:"chart-title", transform:`rotate(-90 17 ${(m.t+H-m.b)/2})`}, "Map precision ε (lower = sharper)");
     }
 
-    ids.filter(id => id !== 'depthLayers').forEach(id => el[id].addEventListener("input", update));
+    ids.filter(id => !['depthLayers', 'areaEpsilon', 'available'].includes(id))
+      .forEach(id => el[id].addEventListener("input", update));
+    el.areaEpsilon.addEventListener('input', () => { updatePreviews(); updateArea(read()); });
+    el.available.addEventListener('input', () => updateArea(read()));
     el.depthLayers.addEventListener('input', updateTotal);
     document.querySelectorAll("[data-rho]").forEach(button => button.addEventListener("click", () => { el.rho.value = button.dataset.rho; update(); }));
     document.getElementById("reset").addEventListener("click", () => { Object.entries(defaults).forEach(([id, value]) => el[id].value = value); update(); });
