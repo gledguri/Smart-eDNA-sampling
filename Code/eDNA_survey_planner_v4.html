@@ -201,7 +201,6 @@ input[readonly] { background: #edf3f1; }
     .color-key .k-out::before { background: #138554; }
     .color-key .k-ex::before { background: var(--skyblue); }
     .not-sure { margin: 4px 0 0; font-size: .8rem; color: var(--muted); font-style: italic; }
-    .optional-tag { display: inline-block; margin-left: 8px; padding: 3px 9px; border-radius: 999px; background: #eef0f7; color: #5d5792; font-size: .68rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; vertical-align: middle; }
     .chart-lead { margin: 0 0 4px; font-size: .98rem; font-weight: 600; color: var(--ink); }
     .advanced-sim { background: #f8faf9; border: 1px solid var(--line); border-radius: 12px; padding: 4px 16px 14px; margin-top: 18px; }
     .advanced-sim > summary { padding-top: 12px; }
@@ -350,7 +349,7 @@ input[readonly] { background: #edf3f1; }
       </article>
 
       <details class="card result-card area-question workflow-output">
-        <summary><h2>How much area can my budget cover?<span class="optional-tag">Optional · beyond manuscript</span></h2><span class="badge">samples → area</span></summary>
+        <summary><h2>How much area can my budget cover?</h2><span class="badge">samples → area</span></summary>
         <p class="section-copy"><em>Have a fixed number of samples instead? See how much area they’ll cover at your precision target.</em> This inverse calculation is an extra convenience and is not part of the published manuscript — treat it as indicative planning support.</p>
         <p class="section-copy">Choose a precision target and sample budget to calculate the area supported.</p>
         <div class="question-body"><div class="question-inputs"><h3>Inputs for this question</h3><div class="field slider-field">
@@ -530,6 +529,12 @@ input[readonly] { background: #edf3f1; }
     }
     ["epsilon", "areaEpsilon"].forEach(id => {
       const input = el[id], preview = document.getElementById(id + "Preview");
+      if (id === "areaEpsilon") {
+        document.querySelector('label[for="areaEpsilon"]').addEventListener("click", event => {
+          event.preventDefault();
+          input.focus({preventScroll: true});
+        });
+      }
       let pointerActive = false;
       let dismissed = false;
       const show = () => { if (!pointerActive && !dismissed) preview.hidden = false; };
